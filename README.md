@@ -1,2 +1,6 @@
 # ProjectAI
-Personal Project
+TODO:
+- Everything
+- Looks
+- Functionality
+- A lot
