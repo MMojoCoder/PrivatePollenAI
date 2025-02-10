@@ -16,7 +16,7 @@ body {
 .sidebar {
     min-width:225px;
     border-right: 1px solid rgb(255, 255, 255);
-    display: flex;
+    display: none;
     flex-direction: column;
 }
 
@@ -43,7 +43,7 @@ body {
     flex:1;
 }
 
-.search, .new-chat {
+.new-chat {
     background-color: rgb(0, 0, 0);
     color: white;
     border: 1px solid transparent;
@@ -51,31 +51,13 @@ body {
     height: 30px;
 }
 
-.search:hover, .new-chat:hover {
+.new-chat:hover {
     background-color: hsl(0, 0%, 17%);
     border-radius: 5px;
 }
 
 .sidebar span {
     margin-left: 10px;
-    color: white;
-}
-
-.bottom {
-    border-top: 1px solid rgb(255, 255, 255);
-    height: 5%;
-    margin-top:auto;
-    display:flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.bottom:hover {
-    background-color: hsl(0, 0%, 17%);
-}
-
-.bottom a {
-    margin: 5px;
     color: white;
 }
 
@@ -94,8 +76,6 @@ body {
 
 /* LEFT CHEVRON */
 .left {
-    margin-top:25px;
-    margin-left:5px;
     color: white;
     top:0;
     left:0;
@@ -151,32 +131,30 @@ body {
     margin-right: 15px;
 }
 
-.ai-options {
+#displayModel {
     margin-left: 15px;
     color: white;
     display:flex;
     align-items: center;
     justify-content: center;
     padding:5px;
+    gap: 10px;
     border-radius: 5px;
     background-color: transparent;
 }
 
-.settings {
-    display:flex;
-    align-items: center;
-    gap:10px;
-    font-size: large;
-    font-weight: bold;
-    color: white;
+.settings-logo {
     border: none;
-    border-radius: 5px;
     background: none;
+    border-radius: 10px;
+    padding:5px;
+    justify-self:left;
 }
 
-.ai-options:hover{
+.settings-logo:hover {
     background-color:hsl(0 0% 10.2%);
 }
+
 
 
 .send-message-btn {
@@ -204,9 +182,14 @@ body {
     
 }
 
+/* Chat scroll look removed */
+::-webkit-scrollbar {
+    display: none;
+}
+
 .model {
-    width: 150px;
-    height:150px;
+    width: 200px;
+    height:fit-content;
     background-color: white;
     display:flex;
     flex-direction: column;
@@ -215,6 +198,7 @@ body {
     position: fixed;
     top:50%;
     left:50%;
+    gap: 20px;
     transform: translate(-50%, -50%);
     padding: 30px;
     border-radius: 20px;
@@ -223,14 +207,143 @@ body {
 }
 
 #model-options {
-    width: 150px;
+    width: 200px;
     height: 30px;
 }
 
 #model-close {
-    width: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding:5px;
+    width: 50px;
     height: 30px;
     border-radius: 10px;
     border: none;
     background-color: red;
+}
+
+.right {
+    width: 30px; 
+    height: 30px; 
+    order: -1; 
+    background-color: transparent; 
+    border:none; 
+    margin-top: 20px;
+    margin-left: 5px;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.right:hover {
+    background-color: hsl(0, 0%, 17%);
+    border-radius: 5px;
+}
+
+/* AI RESPONSE TEXTS */
+
+.ai-response {
+    padding: 15px;
+    width: fit-content;
+    margin-right: auto;
+}
+
+
+.ai-response p, .ai-response li, .ai-response ol, .ai-response h1, .ai-response h2,.ai-response h3, .ai-response span, .ai-response {
+    color:white;
+    display: inline-block;
+    word-break: break-word;
+    white-space: pre-wrap; 
+    margin: 5px 0px;
+}
+
+.ai-response table, .ai-response thead, .ai-response tbody, .ai-response td, .ai-response tr {
+    border: 2px solid red;
+    color: red;
+    text-align: center;
+}
+
+.ai-response a {
+    color: #7ab7ff;
+}
+
+.ai-response blockquote { /* gotta decode */
+    background: rgb(138, 0, 0);
+    border: 2px solid rgb(134, 134, 134);
+    padding: 10px; /* Simplified padding */
+    border-radius: 20px;
+    color: white;
+    word-break: break-word;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    text-align: left; /* Align text to the right */
+    margin: 0 5px; /* Simplified margin */
+    display: flex;
+    flex-direction: column; /* Changed to column for better text handling */
+    flex-wrap: wrap;
+    align-items: flex-start; /* Align items to the end (right) */
+    width: fit-content;
+}
+
+.ai-response em {
+    text-align: right;
+}
+
+.ai-response ul {
+    margin-top:-20px;
+}
+
+.ai-response pre {
+    background: rgb(66, 66, 66);
+    border: 2px solid rgb(134, 134, 134);
+    padding: 10px;
+    border-radius: 5px;
+    color: white; 
+    display: inline-block;
+    word-break: break-word;
+    white-space: pre-wrap; 
+    overflow-x: auto;
+}
+
+.ai-response hr {
+    margin: 10px 0px;
+}
+
+/* THINKING */
+
+.thinking {
+    padding: 15px;
+    width: fit-content;
+    margin-right: auto;
+    color:white;
+    display: inline-block;
+    word-break: break-word;
+    white-space: pre-wrap; 
+    margin: 5px 0px;
+}
+
+/* Reset Chat History Button */
+#reset-chat-history-btn {
+    width: 100%;
+    min-height: 30px;
+    background-color: rgb(48, 109, 90);
+    color: white;
+    border: none;
+    border-radius: 25px;
+}
+
+#reset-chat-history-btn:hover {
+    background-color: rgb(18, 103, 76);
+}
+
+/* Title */
+
+.title {
+    color: white;
+    margin-bottom: 10px;
+    order: -1;
+    text-align: center;
+    font-size:larger;
+    font-weight: bolder;
 }

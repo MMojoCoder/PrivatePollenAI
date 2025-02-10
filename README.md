@@ -1,6 +1,5 @@
 # ProjectAI
 TODO:
-- Everything
-- Looks
-- Functionality
-- A lot
+
+NOT SO IMPORTANT
+- footnote/li styling
