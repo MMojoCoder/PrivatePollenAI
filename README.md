@@ -1,5 +1,4 @@
-# ProjectAI
-TODO:
+# PrivatePollenAI
 
-NOT SO IMPORTANT
-- footnote/li styling
+TODO:
+- **organizing all my code** <-- definitely needed, awefully messy

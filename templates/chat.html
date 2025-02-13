@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrivatePollenAI</title>
+    <link rel="stylesheet" href="/static/chat.css">
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
+    <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+    <!-- FAVICON(S) -->
+    <link rel="icon" type="image/png" href="../static/images/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="../static/images/favicon.svg" />
+    <link rel="shortcut icon" href="../static/images/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/images/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="PrivatePollenAI" />
+    <link rel="manifest" href="../static/images/site.webmanifest"/>
+</head>
+<body>
+    <div class="main">
+        <div class="chat"></div>
+        <div class="message-box">
+            <textarea id="message" placeholder="Type your message here..."></textarea>
+            <div class="message-bottom">
+                <div style="display:flex;justify-content: center;align-items: center;">
+                    <label id="displayModel" for="model-options"></label>
+                    <button class="settings-logo">
+                        <image width="30" height="30" src="../static/images/settings.svg"></image>
+                    </button>
+                    <div class="commands-btn" onclick="commandsPopup()">Commands</div>
+                </div>
+                <button class="send-message-btn">
+                    <image src="../static/images/send.svg"></image>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- POPUPS -->
+    <dialog class="model-settings">
+        <div class="model">
+            <div style="width:100%;">
+                <h2 style='text-align: center; margin-bottom:10px;'>Settings</h2>
+                <hr style="width:100%; top:0px;">
+            </div>
+            <div style="display:flex; width:100%">
+                <div class="model-part-1">
+                    <div style="margin-bottom:20px;">
+                        <h3 style="text-align: center; margin-bottom: 20px">Choose Model</h3>
+                        <select id="model-options">
+                            <optgroup id="pollinationsAI" label="PollinationsAI"> 
+                                <option value="openai">OpenAI GPT-4o-mini</option>
+                                <option value="openai-large">OpenAI GPT-4o</option>
+                                <option value="qwen">Qwen 2.5 72B</option>
+                                <option value="qwen-coder">Qwen 2.5 Coder 32B</option>
+                                <option value="llama">Llama 3.3 70B</option>
+                                <option value="mistral">Mistral Nemo</option>
+                                <option value="unity">Unity with Mistral Large by Unity AI Lab</option>
+                                <option value="midijourney">Midijourney musical transformer</option>
+                                <option value="rtist">Rtist image generator by @bqrio</option>
+                                <option value="searchgpt">SearchGPT with realtime news and web search</option>
+                                <option value="evil">Evil Mode - Experimental</option>
+                                <option value="deepseek">DeepSeek-V3</option>
+                                <option value="claude-hybridspace">Claude Hybridspace</option>
+                                <option value="deepseek-r1">DeepSeek-R1 Distill Qwen 32B</option>
+                                <option value="llamalight">Llama 3.1 8B Instruct</option>
+                                <option value="llamaguard">Llamaguard 7B AWQ</option>
+                                <option value="gemini">Gemini 2.0 Flash</option>
+                                <option value="gemini-thinking">Gemini 2.0 Flash Thinking</option>
+                                <option value="hormoz">Hormoz 8b by Muhammadreza Haghiri</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div style="display:flex; flex:1;flex-direction: column; justify-content: space-between;">
+                        <h3 style="margin-bottom:10px;">Contact Support</h3>
+                        <textarea id="support"  style="margin-bottom:10px;" placeholder="There is a issue with sending messages..."></textarea>
+                        <button id="submit-support-btn" onclick="contactSupport()">Submit</button>
+                        <h3 style="margin-bottom:10px;">Give feedback</h3>
+                        <textarea id="feedback"  style="margin-bottom:10px;" placeholder="Your website sucks."></textarea>
+                        <button id="submit-feedback-btn" onclick="submitFeedback()">Submit</button>
+                    </div>
+                    <button id="reset-chat-history-btn" onclick="resetHistory()">Reset Chat History</button>
+                </div>
+                <div class="model-part-2">
+                    <h3 style="margin-bottom: 20px; ">System Instructions</h3>
+                    <textarea id="system-instructions" placeholder="Place your system instructions here..."></textarea>
+                </div>
+            </div>
+            <button id="model-close">
+                <img src="../static/images/close.svg">
+            </button>
+        </div>
+    </dialog>
+    <dialog class="popup">
+        <div class="popup-container">
+            <p><strong>Welcome to <span class="gradient-text">PrivatePollenAI</span></strong></p>
+            <p>PrivatePollenAI is your personal chat assistant designed to prioritize your privacy. Here's how it works:</p>
+            <ul>
+                <li><p><strong style="color:rgb(127, 0, 0);">Smart Technology</strong>: Our app is powered by <a style="color:rgb(103, 146, 33); outline: none;" href="https://pollinations.ai/">PollinationAI</a>, which helps provide intelligent responses for your conversation needs.</p>
+                </li>
+                <br>
+                <li><p><strong style="color:blue">Your Data is Private</strong>: We store all your chat data securely in your device's local storage. This means your messages stay private and are not sent to external servers.</p>
+                </li>
+                <br>
+                <li><p><strong style="color:blueviolet">Direct Requests</strong>: When you ask a question, PrivatePollenAI sends private requests directly to PollinationAI to generate answers. This ensures that your inquiries are handled discreetly.</p>
+                </li>
+            </ul>
+            <p><strong><u>Important Note</u></strong>: While we strive to keep your conversations private, please remember that the level of privacy is also determined by PollinationAI's models. Always be cautious with sensitive information.</p>
+            <p>Thank you for choosing PrivatePollenAI, where your privacy is our top priority!</p>
+            <button id="popup-close">
+                <img src="../static/images/close.svg">
+            </button>
+        </div>
+    </dialog>
+    <dialog class="commands">
+        <div class="commands-container">
+            <h1>Commands</h1>
+            <ol>
+                <li><span class="nice-background">/clear</span> → This command clears the chat.</li>
+                <br>
+                <li>I'll add more if anyone actually uses this website. 😉</li>
+            </ol>
+            <button id="commands-close">
+                <img src="../static/images/close.svg">
+            </button>
+        </div>
+
+    </dialog>
+    <script src="/static/chat.js"></script>
+</body>
+</html>
