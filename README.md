@@ -1,4 +1,11 @@
 # PrivatePollenAI
 
+IM STRUGGLING BUT (TRYING) DOING ANYWAY:
+- MATH MARKDOWN(DOESN'T WORK WITH ANYTHING)
+
 TODO:
-- **organizing all my code** <-- definitely needed, awefully messy
+- Add load option while loading
+- Wait for image to LOAD
+
+UNLIKELY TO REPRODUCE:
+- FIX CODE BOX UI ERROR

@@ -10,7 +10,6 @@ let model = JSON.parse(localStorage.getItem('model')) || "openai";
 let system_message = JSON.parse(localStorage.getItem('custom_system_message')) || "";
 const popup_displayed = JSON.parse(localStorage.getItem('displayed_popup')) | false
 
-
 // ------------------------------------------ Variables --------------------------------------------------------
 const textAreaMessage = document.querySelector('#message');
 const chat = document.querySelector('.chat');
@@ -22,6 +21,8 @@ const modelChosen = document.querySelector('#model-options');
 const modelLabel = document.querySelector('#displayModel');
 const custom_system_message = document.querySelector('#system-instructions');
 const popup = document.querySelector('.popup');
+const support = document.querySelector('#support');
+const commandClose = document.querySelector('#commands-close');
 
 // ------------------------------------------ Loading Everything --------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,11 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const title = localStorage.getItem('title');
     const messageContainer = document.createElement('div');
     messageContainer.className = 'title';
-    if(title) {
-        messageContainer.innerHTML = `<span class='title-gradient-text'>${title}</span>`
-    } else {
-        messageContainer.innerHTML = `<span class='title-gradient-text'></span>`
-    }
+    messageContainer.textContent = title
     chat.appendChild(messageContainer);
 
     if(chatHistory.length===0){
@@ -58,13 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 padding: 10px;
                 border-radius: 10px;
                 width: fit-content;
+                max-width: 70%;
                 margin-left: auto;
             `);
         
             const messageUser = document.createElement('span');
             messageUser.textContent = message;
             messageUser.setAttribute("style", `
-                color: white; 
+                color: #f5f5f5; 
                 display: inline-block;
                 word-break: break-word;
                 white-space: pre-wrap; 
@@ -77,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
             chat.appendChild(breakElement);
         } else if(role==='ai') {
             message = marked.marked(message);
-
             message = codeBlockUIEnhancer(message);
             
             const messageContainer = document.createElement('div');
@@ -114,7 +111,6 @@ textAreaMessage.addEventListener("input", () => {
 
 // -------------------------------------- Input For Sending Messages ------------------------------------------
 
-// Click button to send message
 sendMessageButton.addEventListener('click', () => {
     if((textAreaMessage.value).trim()!="") {        
         if(chatHistory.length===0) {
@@ -123,9 +119,14 @@ sendMessageButton.addEventListener('click', () => {
         
         if(textAreaMessage.value==='/clear') {
             resetHistory();
+        } else if(textAreaMessage.value.substring(0, 6) ==='/image') {
+            sendMessage(textAreaMessage.value);
+            generateImage(textAreaMessage.value);
         } else {
             sendMessage(textAreaMessage.value);
+            returnAIMessage();
         }
+
         
         textAreaMessage.value = "";
         e.preventDefault();
@@ -143,8 +144,12 @@ textAreaMessage.addEventListener("keydown", (e) => {
 
             if(textAreaMessage.value==='/clear') {
                 resetHistory();
+            } else if(textAreaMessage.value.substring(0, 6) ==='/image') {
+                sendMessage(textAreaMessage.value);
+                generateImage(textAreaMessage.value);
             } else {
                 sendMessage(textAreaMessage.value);
+                returnAIMessage();
             }
 
             textAreaMessage.value = "";
@@ -154,19 +159,15 @@ textAreaMessage.addEventListener("keydown", (e) => {
     }
 })
 
-// ------------------------------------------ sendMessage Function --------------------------------------------------
+// ------------------------------------------ MAJOR FUNCTIONS --------------------------------------------------
 
-
-// Send message function
 function sendMessage(input) {
     chatHistory.push(['user',input]);
+    saveChatHistory();
 
     if(chatHistory.length === 1) {
         generateTitle();
-
     }
-
-    saveChatHistory()
     
     const messageContainer = document.createElement('div');
     messageContainer.setAttribute('style',`
@@ -174,13 +175,14 @@ function sendMessage(input) {
         padding: 10px;
         border-radius: 10px;
         width: fit-content;
+        max-width: 70%;
         margin-left: auto;
     `);
 
     const message = document.createElement('span');
     message.textContent = input;
     message.setAttribute("style", `
-        color: white; 
+        color: #f5f5f5; 
         display: inline-block;
         word-break: break-word;
         white-space: pre-wrap; 
@@ -191,8 +193,6 @@ function sendMessage(input) {
 
     chat.appendChild(messageContainer);
     chat.appendChild(breakElement);
-
-    returnAIMessage();
 }
 
 async function returnAIMessage() {
@@ -218,6 +218,50 @@ async function returnAIMessage() {
 
     chat.appendChild(messageContainer);
     chat.appendChild(document.createElement('br'));
+    textAreaMessage.disabled = false; 
+    textAreaMessage.focus();
+    textAreaMessage.style.cursor = 'pointer';
+    hljs.highlightAll();
+}
+
+
+async function generateImage(input) {
+    const image_system_prompt = `
+    Generate a image based on users prompt. First improve/enhance the given prompt for better results.
+    Rules: 
+    - Use URL encoding for the prompt to handle special characters.
+    - If the user requests multiple images, generate unique seeds for each and generate each image according to format.
+    
+    Example format:
+
+    Original Prompt: 
+    Enhanced Prompted:
+    ![Image](https://image.pollinations.ai/prompt/{description}?width={width}&height={height}&seed=(random_seed)&nologo=true)  
+    `
+
+    textAreaMessage.disabled = true;
+    textAreaMessage.style.cursor = 'wait';
+
+    let thinking = displayThinking();
+    scrollDown();
+    let chat_history = chatHistory.map(message => message[1]);
+    let response = await pollinationsAI(prompt=input, systemMessage=image_system_prompt, model='openai');
+    clearInterval(thinking);
+    chat.removeChild(document.querySelector('.thinking'));
+
+    chatHistory.push(['ai', response]);
+    saveChatHistory();
+    response = marked.marked(response);
+
+    response = codeBlockUIEnhancer(response);
+
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'ai-response';
+    messageContainer.innerHTML = response.trim();
+
+    chat.appendChild(messageContainer);
+    chat.appendChild(document.createElement('br'));
+
     textAreaMessage.disabled = false; 
     textAreaMessage.focus();
     textAreaMessage.style.cursor = 'pointer';
@@ -257,6 +301,7 @@ async function pollinationsAI(prompt, systemMessage = "assistant", chosenModel='
         return "There was a problem connecting to the AI server. Please try again later."
     }
 }
+// ------------------------------------------ MINOR FUNCTIONS ---------------------------------------------
 
 function displayThinking() {
     const tempMessageContainer = document.createElement('div');
@@ -289,7 +334,7 @@ modelChosen.addEventListener('change', (chosenModel) => {
     modelLabel.textContent = chosenModel.target.options[chosenModel.target.selectedIndex].textContent; 
 })
 
-// ------------------------------------------ Save Chat History ---------------------------------------------------------
+// ------------------------------------------ Chat History ---------------------------------------------------------
 function saveChatHistory() {
     localStorage.setItem('local_chat_history', JSON.stringify(chatHistory));
 }
@@ -298,7 +343,6 @@ function saveModel() {
     localStorage.setItem('model', JSON.stringify(model));
 }
 
-// RESET HISTORY FUNCTION
 function resetHistory() {
     chatHistory = [];
     localStorage.setItem('title', '');
@@ -322,10 +366,12 @@ function resetHistory() {
 async function generateTitle() {
     const title = document.querySelector('.title');
     let chat_history = chatHistory.map(message => message[1]);
-    let response = await pollinationsAI(chat_history.join("\n"), systemMessage="Generate a very short title based on the user's input. Nothing else.");
+    let response = await pollinationsAI(chat_history.join("\n"), systemMessage="Generate a very short title based on the user's input. Nothing else. Do not respond to users prompt, merely generate a title based on user input.");
     localStorage.setItem('title', response);
-    title.innerHTML = `<span class='title-gradient-text'>${response}</span>`;
+    title.textContent = response;
 }
+
+// ------------------------------------------ FORMATTING ---------------------------------------------------------
 
 
 function codeBlockUIEnhancer(message) {
@@ -345,7 +391,18 @@ function codeBlockUIEnhancer(message) {
 
             languageRegex.lastIndex = 0;
             match = languageRegex.exec(remainder);
-            match = match[1];
+
+            if (!match) {
+                console.error("No language match found:", remainder);
+                break;
+            }
+            
+            try { // Remove later
+                match = match[1];
+            } catch(error) {
+                alert(error);
+                break;
+            }
 
 
             temp += remainder.slice(0, index) + `<div class='code-container'><div class='code-language'>${match}</div><pre>`;
@@ -366,8 +423,8 @@ function scrollDown() {
 }
 
 
-// SUPPORT AND FEEDBACK
-const support = document.querySelector('#support');
+// ------------------------------------------ Contact/Support ---------------------------------------------------------
+
 function contactSupport() {
     if((support.value).length == 0) {
         alert("Don't press this button unless you mean it.");
@@ -413,13 +470,13 @@ function submitFeedback() {
     feedback.value = '';
 }
 
-// CUSTOM SYSTEM MESSAGE
+// ------------------------------------------ SAVE CUSTOM SYSTEM MESSAGE ---------------------------------------------------------
 custom_system_message.addEventListener('change', () => {
     system_message = custom_system_message.value;
     localStorage.setItem('custom_system_message', JSON.stringify(custom_system_message.value));
 })
+// ------------------------------------------ WELCOME POPUP ---------------------------------------------------------
 
-//  POPUP CLOSE
 
 const popupClose = document.querySelector('#popup-close');
 
@@ -428,7 +485,8 @@ popupClose.addEventListener('click', () => {
     localStorage.setItem('displayed_popup', true);
 })
 
-// COMMAND BUTTON POPUP
+// ------------------------------------------ COMMANDS POPUP ---------------------------------------------------------
+
 
 const command = document.querySelector('.commands');
 
@@ -436,9 +494,8 @@ function commandsPopup() {
     command.showModal();
 }
 
-
-const commandClose = document.querySelector('#commands-close');
-
 commandClose.addEventListener('click', () => {
     command.close();
 })
+
+// ------------------------------------------ EXTRA CODE IM TOO LAZY TO ORGANIZE ---------------------------------------------------------

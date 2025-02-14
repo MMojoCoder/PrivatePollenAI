@@ -10,10 +10,9 @@ body {
     margin:0px;
     height:100vh;
     width:100%;
-    background-color: black;
+    background-color: #1a1a1a;
     display: flex;
 }
-
 
 /* MAIN CONTAINER */
 .main {
@@ -26,19 +25,6 @@ body {
     justify-content: center;
     padding-bottom:0px;
 }
-
-/* LEFT CHEVRON */
-.left {
-    color: white;
-    top:0;
-    left:0;
-    background-color:hsl(0, 0%, 0%);
-    border: none;
-    width:30px;
-    height:30px;
-    cursor: pointer;
-}
-
 
 .message-box {
     margin-top:auto;
@@ -74,10 +60,6 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
-}
-
-.send-message-logo {
-    margin-right: 15px;
 }
 
 #displayModel {
@@ -117,9 +99,10 @@ body {
 
 .send-message-btn:hover {
     filter:brightness(115%);
-    transform: scale(1.05); /* Slightly enlarge on hover */
+    transform: scale(1.05);
 }
 
+/* CHAT PAGE */
 .chat {
     display:flex;
     flex-direction: column;
@@ -131,11 +114,11 @@ body {
     overflow:auto;
 }
 
-/* Chat scroll look removed */
-::-webkit-scrollbar {
+::-webkit-scrollbar { /* Chat scroll look removed */
     display: none;
 }
 
+/* SETTINGS PAGE */
 .model-settings::backdrop {
     background: black;
     opacity: 0.5;
@@ -212,7 +195,7 @@ body {
     padding: 15px;
     width: fit-content;
     margin-right: auto;
-    color:white;
+    color:rgb(255, 255, 255);
     display: inline-block;
     word-break: break-word;
     white-space: pre-wrap; 
@@ -230,7 +213,7 @@ body {
     color: #7ab7ff;
 }
 
-.ai-response blockquote { /* gotta decode */
+.ai-response blockquote {
     background: rgb(95, 0, 0);
     border: 2px solid rgb(255, 255, 255);
     padding: 10px; 
@@ -264,17 +247,13 @@ body {
     margin: 10px 0px;
 }
 
-
-/* CODE CONTAINER */
-
+/* AI RESPONSE - CODE CONTAINER */
 .ai-response .code-container {
     width:fit-content;
     margin:10px 0px;
-
 }
 
 .ai-response .code-language {
-    width:u;
     height:30px;
     display:flex;
     justify-content: center;
@@ -282,12 +261,12 @@ body {
     background-color: #4B4B4B;
     border-top-left-radius: 25px;
     border-top-right-radius: 25px;
-
 }
 
 .ai-response pre {
+    min-width: 80px;
     background: #0d1117;
-    border: 10px solid #1e1e1e;
+    border: 10px solid #272727;
     margin-top: 0px;
     padding: 10px;
     border-bottom-right-radius: 5px;
@@ -298,8 +277,6 @@ body {
     white-space: pre-wrap; 
     overflow-x: auto;
 }
-
-
 
 /* THINKING */
 
@@ -334,22 +311,21 @@ body {
 
 .title {
     color: white;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     order: -1;
     text-align: center;
     font-size:xx-large;
     font-weight: bolder;
+    display: inline-block;
+    word-break: break-word;
+    white-space: pre-wrap; 
 }
 
-.title-gradient-text {
-    background: linear-gradient(45deg, rgb(162, 255, 0), rgb(126, 165, 223), rgb(255, 7, 7));
-    -webkit-background-clip: text;
-    color: transparent;    
-}
+/* SYSTEM INSTRUCTIONS */
 
 #system-instructions {
     width:450px; 
-    height:400px; /* Yes I wanted to match PERFECTLY*/
+    height:400px; 
     color:white;
     background-color: #1e1e1e; 
     padding:5px;
@@ -397,7 +373,7 @@ body {
 /* POPUP */
 .popup-container {
     width: 500px;
-    height:460px;
+    height:540px;
     background-color: white;
     display:flex;
     flex-direction: column;
@@ -435,12 +411,7 @@ body {
     cursor: pointer;
 }
 
-.gradient-text {
-    background: linear-gradient(90deg, rgb(103, 146, 33), rgb(82, 132, 207), rgb(195, 0, 230));
-    -webkit-background-clip: text;
-    color: transparent;
-    font-weight: bold;
-}
+/* WELCOME MESSAGE */
 
 .welcome-message {
     color:white;
@@ -454,6 +425,8 @@ body {
     justify-content: center;
     align-items: center;
 }
+
+/* COMMANDS */
 
 .commands-btn {
     display:flex;
@@ -497,14 +470,6 @@ body {
     margin-bottom:20px;
 }
 
-.nice-background {
-    background-color: #ffffff;
-    border-radius: 5px;
-    padding:5px;
-    color:black;
-    font-weight: bolder;
-}
-
 #commands-close {
     margin-top:auto;
     align-self: center;
@@ -520,3 +485,21 @@ body {
     cursor: pointer;
     outline:none;
 }
+
+
+/* GENERAL EFFECTS */
+.gradient-text {
+    background: linear-gradient(90deg, rgb(103, 146, 33), rgb(82, 132, 207), rgb(195, 0, 230));
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight: bold;
+}
+
+.nice-background {
+    background-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    padding:5px;
+    color:black;
+    font-weight: bolder;
+}
+
