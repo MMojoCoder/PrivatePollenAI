@@ -6,10 +6,12 @@
     <title>PrivatePollenAI</title>
     <link rel="stylesheet" href="/static/chat.css">
     <!-- SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js"></script>
+    <!-- MARKED SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-footnote/dist/index.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
     <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>  
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
     <!-- FAVICON(S) -->
     <link rel="icon" type="image/png" href="../static/images/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="../static/images/favicon.svg" />
@@ -32,7 +34,7 @@
                     <div class="commands-btn" onclick="commandsPopup()">Commands</div>
                 </div>
                 <button class="send-message-btn">
-                    <image src="../static/images/send.svg"></image>
+                    <img style="height:30px; width:30px;" src="../static/images/send.svg"></img>
                 </button>
             </div>
         </div>
@@ -71,14 +73,6 @@
                                 <option value="hormoz">Hormoz 8b by Muhammadreza Haghiri</option>
                             </optgroup>
                         </select>
-                    </div>
-                    <div style="display:flex; flex:1;flex-direction: column; justify-content: space-between;">
-                        <h3 style="margin-bottom:10px;">Contact Support</h3>
-                        <textarea id="support"  style="margin-bottom:10px;" placeholder="There is a issue with sending messages..."></textarea>
-                        <button id="submit-support-btn" onclick="contactSupport()">Submit</button>
-                        <h3 style="margin-bottom:10px;">Give feedback</h3>
-                        <textarea id="feedback"  style="margin-bottom:10px;" placeholder="Your website sucks."></textarea>
-                        <button id="submit-feedback-btn" onclick="submitFeedback()">Submit</button>
                     </div>
                     <button id="reset-chat-history-btn" onclick="resetHistory()">Reset Chat History</button>
                 </div>

@@ -1,11 +1,6 @@
 # PrivatePollenAI
-
-IM STRUGGLING BUT (TRYING) DOING ANYWAY:
-- MATH MARKDOWN(DOESN'T WORK WITH ANYTHING)
-
 TODO:
-- Add load option while loading
-- Wait for image to LOAD
+- Create nice loading screen(1 sec)
 
-UNLIKELY TO REPRODUCE:
-- FIX CODE BOX UI ERROR
+...
+- Try another attempt at markdown with math --> latex --> katex

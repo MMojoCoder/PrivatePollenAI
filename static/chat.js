@@ -10,6 +10,9 @@ let model = JSON.parse(localStorage.getItem('model')) || "openai";
 let system_message = JSON.parse(localStorage.getItem('custom_system_message')) || "";
 const popup_displayed = JSON.parse(localStorage.getItem('displayed_popup')) | false
 
+// ------------------------------------------ Markdown Setup --------------------------------------------------------
+marked.use(markedFootnote());
+
 // ------------------------------------------ Variables --------------------------------------------------------
 const textAreaMessage = document.querySelector('#message');
 const chat = document.querySelector('.chat');
@@ -21,12 +24,11 @@ const modelChosen = document.querySelector('#model-options');
 const modelLabel = document.querySelector('#displayModel');
 const custom_system_message = document.querySelector('#system-instructions');
 const popup = document.querySelector('.popup');
-const support = document.querySelector('#support');
 const commandClose = document.querySelector('#commands-close');
+const reset_chat_history_btn = document.querySelector('#reset-chat-history-btn');
 
 // ------------------------------------------ Loading Everything --------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-
     // Adding Title
     const title = localStorage.getItem('title');
     const messageContainer = document.createElement('div');
@@ -52,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const messageContainer = document.createElement('div');
             messageContainer.setAttribute('style',`
                 background-color: rgb(46, 46, 46);
-                padding: 10px;
+                padding: 15px;
                 border-radius: 10px;
                 width: fit-content;
                 max-width: 70%;
@@ -60,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `);
         
             const messageUser = document.createElement('span');
-            messageUser.textContent = message;
+            messageUser.textContent = DOMPurify.sanitize(message);
             messageUser.setAttribute("style", `
                 color: #f5f5f5; 
                 display: inline-block;
@@ -74,12 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
             chat.appendChild(messageContainer);
             chat.appendChild(breakElement);
         } else if(role==='ai') {
-            message = marked.marked(message);
+            message = marked.parse(message);
+            
             message = codeBlockUIEnhancer(message);
             
             const messageContainer = document.createElement('div');
             messageContainer.className = 'ai-response';
-            messageContainer.innerHTML = message.trim();
+            messageContainer.innerHTML = DOMPurify.sanitize(message.trim());
         
             chat.appendChild(messageContainer);
             chat.appendChild(document.createElement('br'));
@@ -101,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 })
 
+
 // ------------------------------------------ Message Box Changes ---------------------------------------------
 textAreaMessage.addEventListener("input", () => {
     if(textAreaMessage.textContent==="") {
@@ -116,12 +120,12 @@ sendMessageButton.addEventListener('click', () => {
         if(chatHistory.length===0) {
             chat.removeChild(document.querySelector('.welcome-message'));
         } 
-        
+
         if(textAreaMessage.value==='/clear') {
             resetHistory();
         } else if(textAreaMessage.value.substring(0, 6) ==='/image') {
             sendMessage(textAreaMessage.value);
-            generateImage(textAreaMessage.value);
+            generateImage((textAreaMessage.value).substring(6, textAreaMessage.length));
         } else {
             sendMessage(textAreaMessage.value);
             returnAIMessage();
@@ -146,7 +150,7 @@ textAreaMessage.addEventListener("keydown", (e) => {
                 resetHistory();
             } else if(textAreaMessage.value.substring(0, 6) ==='/image') {
                 sendMessage(textAreaMessage.value);
-                generateImage(textAreaMessage.value);
+                generateImage((textAreaMessage.value).substring(6, textAreaMessage.length));
             } else {
                 sendMessage(textAreaMessage.value);
                 returnAIMessage();
@@ -162,6 +166,7 @@ textAreaMessage.addEventListener("keydown", (e) => {
 // ------------------------------------------ MAJOR FUNCTIONS --------------------------------------------------
 
 function sendMessage(input) {
+    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="../static/images/loading.gif"></img>';    
     chatHistory.push(['user',input]);
     saveChatHistory();
 
@@ -172,7 +177,7 @@ function sendMessage(input) {
     const messageContainer = document.createElement('div');
     messageContainer.setAttribute('style',`
         background-color: rgb(46, 46, 46);
-        padding: 10px;
+        padding: 15px;
         border-radius: 10px;
         width: fit-content;
         max-width: 70%;
@@ -180,7 +185,7 @@ function sendMessage(input) {
     `);
 
     const message = document.createElement('span');
-    message.textContent = input;
+    message.textContent = DOMPurify.sanitize(input);
     message.setAttribute("style", `
         color: #f5f5f5; 
         display: inline-block;
@@ -198,6 +203,8 @@ function sendMessage(input) {
 async function returnAIMessage() {
     textAreaMessage.disabled = true;
     textAreaMessage.style.cursor = 'wait';
+    reset_chat_history_btn.disabled = true;
+    reset_chat_history_btn.style.cursor = 'wait';
 
     let thinking = displayThinking();
     scrollDown();
@@ -205,7 +212,6 @@ async function returnAIMessage() {
     let response = await pollinationsAI(chat_history.join("\n"), systemMessage=system_message, chosenModel=model);
     clearInterval(thinking);
     chat.removeChild(document.querySelector('.thinking'));
-
     chatHistory.push(['ai', response]);
     saveChatHistory();
     response = marked.marked(response);
@@ -214,14 +220,17 @@ async function returnAIMessage() {
 
     const messageContainer = document.createElement('div');
     messageContainer.className = 'ai-response';
-    messageContainer.innerHTML = response.trim();
+    messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
 
     chat.appendChild(messageContainer);
     chat.appendChild(document.createElement('br'));
     textAreaMessage.disabled = false; 
     textAreaMessage.focus();
     textAreaMessage.style.cursor = 'pointer';
+    reset_chat_history_btn.disabled = false;
+    reset_chat_history_btn.style.cursor = 'pointer';
     hljs.highlightAll();
+    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="../static/images/send.svg"></img>';    
 }
 
 
@@ -240,7 +249,9 @@ async function generateImage(input) {
     `
 
     textAreaMessage.disabled = true;
+    reset_chat_history_btn.disabled = true;
     textAreaMessage.style.cursor = 'wait';
+    reset_chat_history_btn.style.cursor = 'wait';
 
     let thinking = displayThinking();
     scrollDown();
@@ -257,15 +268,18 @@ async function generateImage(input) {
 
     const messageContainer = document.createElement('div');
     messageContainer.className = 'ai-response';
-    messageContainer.innerHTML = response.trim();
+    messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
 
     chat.appendChild(messageContainer);
     chat.appendChild(document.createElement('br'));
 
     textAreaMessage.disabled = false; 
+    reset_chat_history_btn.disabled = false;
     textAreaMessage.focus();
     textAreaMessage.style.cursor = 'pointer';
+    reset_chat_history_btn.style.cursor = 'pointer';
     hljs.highlightAll();
+    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="../static/images/send.svg"></img>';    
 }
 
 async function pollinationsAI(prompt, systemMessage = "assistant", chosenModel='openai') {
@@ -390,7 +404,7 @@ function codeBlockUIEnhancer(message) {
             }
 
             languageRegex.lastIndex = 0;
-            match = languageRegex.exec(remainder);
+            match = languageRegex.exec(remainder); 
 
             if (!match) {
                 console.error("No language match found:", remainder);
@@ -398,7 +412,7 @@ function codeBlockUIEnhancer(message) {
             }
             
             try { // Remove later
-                match = match[1];
+                match = match[1] || "plaintext";
             } catch(error) {
                 alert(error);
                 break;
@@ -422,53 +436,6 @@ function scrollDown() {
     chat.scrollTo(0, chat.scrollHeight);
 }
 
-
-// ------------------------------------------ Contact/Support ---------------------------------------------------------
-
-function contactSupport() {
-    if((support.value).length == 0) {
-        alert("Don't press this button unless you mean it.");
-        return null;
-    }
-    
-    $.ajax({
-        url: 'http://127.0.0.1:5000/contact-support',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({message: support.value}),
-        success: function(response) {
-            alert('Message was sent.');
-            support.textContent = '';
-        },
-        error: function(error) {
-            alert('Error. Contacting support failed.');
-        }
-    });
-    support.value = '';
-}
-
-const feedback = document.querySelector('#feedback');
-function submitFeedback() {
-    if((feedback.value).length == 0) {
-        alert("Don't press this button unless you mean it.");
-        return null;
-    }
-
-    $.ajax({
-        url: 'http://127.0.0.1:5000/submit-feedback',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({message: feedback.value}),
-        success: function(response) {
-            alert('Message was sent.');
-            feedback.value = '';
-        },
-        error: function(error) {
-            alert('Error. Feedback failed was not delivered.');
-        }
-    });
-    feedback.value = '';
-}
 
 // ------------------------------------------ SAVE CUSTOM SYSTEM MESSAGE ---------------------------------------------------------
 custom_system_message.addEventListener('change', () => {
