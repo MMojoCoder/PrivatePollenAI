@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PrivatePollenAI</title>
     <link rel="stylesheet" href="/static/chat.css">
-    <!-- SCRIPTS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js"></script>
+    <!-- DOM PURIFY -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js" crossorigin="anonymous"></script>
     <!-- MARKED SCRIPTS -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked-footnote/dist/index.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
-    <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>  
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-footnote/dist/index.umd.min.js" crossorigin="anonymous"></script>
+    <!-- HIGHLIGHTING -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css" crossorigin="anonymous">
+    <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js" crossorigin="anonymous"></script>  
+    <!-- KATEX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>
     <!-- FAVICON(S) -->
     <link rel="icon" type="image/png" href="../static/images/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="../static/images/favicon.svg" />
@@ -113,7 +117,6 @@
                 <br>
                 <li><span class="nice-background">/image</span> → This command generates a image using pollinationsAI.</li>
                 <br>
-                <li>I'll add more if anyone actually uses this website. 😉</li>
             </ol>
             <button id="commands-close">
                 <img src="../static/images/close.svg">

@@ -76,14 +76,22 @@ document.addEventListener('DOMContentLoaded', () => {
             chat.appendChild(messageContainer);
             chat.appendChild(breakElement);
         } else if(role==='ai') {
+            message = processLatexFormula(message);
             message = marked.parse(message);
             
             message = codeBlockUIEnhancer(message);
             
             const messageContainer = document.createElement('div');
             messageContainer.className = 'ai-response';
+            
+            // Sanitization
             messageContainer.innerHTML = DOMPurify.sanitize(message.trim());
-        
+            const links = messageContainer.querySelectorAll('a');
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', "noopener noreferrer");
+            });
+            
             chat.appendChild(messageContainer);
             chat.appendChild(document.createElement('br'));
         }
@@ -214,13 +222,20 @@ async function returnAIMessage() {
     chat.removeChild(document.querySelector('.thinking'));
     chatHistory.push(['ai', response]);
     saveChatHistory();
+    response = processLatexFormula(response); // REMOVE HERE IF NOT WORKING
     response = marked.marked(response);
-
     response = codeBlockUIEnhancer(response);
 
     const messageContainer = document.createElement('div');
     messageContainer.className = 'ai-response';
+
+    // Sanitization
     messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
+    const links = messageContainer.querySelectorAll('a');
+    links.forEach(link => {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', "noopener noreferrer");
+    });
 
     chat.appendChild(messageContainer);
     chat.appendChild(document.createElement('br'));
@@ -268,7 +283,14 @@ async function generateImage(input) {
 
     const messageContainer = document.createElement('div');
     messageContainer.className = 'ai-response';
+
+    // Sanitization
     messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
+    const links = messageContainer.querySelectorAll('a');
+    links.forEach(link => {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', "noopener noreferrer");
+    });
 
     chat.appendChild(messageContainer);
     chat.appendChild(document.createElement('br'));
@@ -466,3 +488,32 @@ commandClose.addEventListener('click', () => {
 })
 
 // ------------------------------------------ EXTRA CODE IM TOO LAZY TO ORGANIZE ---------------------------------------------------------
+
+function processLatexFormula(text) {
+    const displayPattern = /\\\[((?:\\[^]|[^\\])*?)\\\]|\$\$((?:\\[^]|[^\\])*?)\$\$/g;
+    const inlinePattern = /\\\(((?:\\[^]|[^\\])*?)\\\)|\$((?:\\[^]|[^\\])*?)\$/g;
+
+    // Render display mode
+    text = text.replace(displayPattern, (match, formula1, formula2) => {
+        const formula = formula1 || formula2; 
+        return katex.renderToString(formula.trim(), {
+            displayMode: true,
+            throwOnError: false,
+            strict: false,
+            trust: true,
+        });
+    });
+
+    // Render inline mode
+    text = text.replace(inlinePattern, (match, formula1, formula2) => {
+        const formula = formula1 || formula2; 
+        return katex.renderToString(formula.trim(), {
+            displayMode: false,
+            throwOnError: false,
+            strict: false,
+            trust: true,
+        });
+    });
+
+    return text;
+  }

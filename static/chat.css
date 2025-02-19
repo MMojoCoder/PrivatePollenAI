@@ -5,11 +5,6 @@
     font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-html {
-    height:100vh;
-    width:100%;
-}
-
 body {
     padding: 0px;
     margin:0px;
@@ -17,6 +12,7 @@ body {
     width:100%;
     background-color: #1a1a1a;
     display: flex;
+    overflow:hidden;
 }
 
 /* MAIN CONTAINER */
@@ -336,10 +332,10 @@ body {
 
 #system-instructions {
     width:450px; 
-    height:400px; 
+    height:390px; 
     color:white;
     background-color: #1e1e1e; 
-    padding:5px;
+    padding:10px;
     border: none;
     overflow: auto;
     outline: none;
@@ -513,4 +509,3 @@ body {
     color:black;
     font-weight: bolder;
 }
-
