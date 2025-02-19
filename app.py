@@ -8,4 +8,4 @@ def chat():
     return render_template('/chat.html')
 
 if __name__ == '__main__':
-    serve(app, host="0.0.0.0",port=5001)
+    serve(app, host="0.0.0.0",port=10000)
