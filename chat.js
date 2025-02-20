@@ -430,7 +430,6 @@ function codeBlockUIEnhancer(message) {
 
             if (!match) {
                 console.error("No language match found:", remainder);
-                break;
             }
             
             try { // Remove later
