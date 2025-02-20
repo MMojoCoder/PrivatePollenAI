@@ -174,7 +174,7 @@ textAreaMessage.addEventListener("keydown", (e) => {
 // ------------------------------------------ MAJOR FUNCTIONS --------------------------------------------------
 
 function sendMessage(input) {
-    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="../static/images/loading.gif"></img>';    
+    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="./images/loading.gif"></img>';    
     chatHistory.push(['user',input]);
     saveChatHistory();
 
@@ -245,7 +245,7 @@ async function returnAIMessage() {
     reset_chat_history_btn.disabled = false;
     reset_chat_history_btn.style.cursor = 'pointer';
     hljs.highlightAll();
-    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="../static/images/send.svg"></img>';    
+    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="./images/send.svg"></img>';    
 }
 
 
@@ -301,7 +301,7 @@ async function generateImage(input) {
     textAreaMessage.style.cursor = 'pointer';
     reset_chat_history_btn.style.cursor = 'pointer';
     hljs.highlightAll();
-    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="../static/images/send.svg"></img>';    
+    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="./images/send.svg"></img>';    
 }
 
 async function pollinationsAI(prompt, systemMessage = "assistant", chosenModel='openai') {
