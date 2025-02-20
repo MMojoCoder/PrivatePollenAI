@@ -250,7 +250,7 @@ body {
     margin: 10px 0px;
     height:600px;
     width:800px;
-    background: url(/static/images/coming-soon.jpg);
+    background: url(./images/coming-soon.jpg);
     background-size:100% 100%;
 }
 
