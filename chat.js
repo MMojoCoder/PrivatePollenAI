@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `);
         
             const messageUser = document.createElement('span');
-            messageUser.textContent = DOMPurify.sanitize(message);
+            messageUser.textContent = message;
             messageUser.setAttribute("style", `
                 color: #f5f5f5; 
                 display: inline-block;
@@ -84,8 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const messageContainer = document.createElement('div');
             messageContainer.className = 'ai-response';
             
-            // Sanitization
-            messageContainer.innerHTML = DOMPurify.sanitize(message.trim());
+            messageContainer.innerHTML = message.trim();
             const links = messageContainer.querySelectorAll('a');
             links.forEach(link => {
                 link.setAttribute('target', '_blank');
@@ -193,7 +192,7 @@ function sendMessage(input) {
     `);
 
     const message = document.createElement('span');
-    message.textContent = DOMPurify.sanitize(input);
+    message.textContent = input;
     message.setAttribute("style", `
         color: #f5f5f5; 
         display: inline-block;
@@ -229,8 +228,7 @@ async function returnAIMessage() {
     const messageContainer = document.createElement('div');
     messageContainer.className = 'ai-response';
 
-    // Sanitization
-    messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
+    messageContainer.innerHTML = response.trim();
     const links = messageContainer.querySelectorAll('a');
     links.forEach(link => {
         link.setAttribute('target', '_blank');
@@ -284,8 +282,7 @@ async function generateImage(input) {
     const messageContainer = document.createElement('div');
     messageContainer.className = 'ai-response';
 
-    // Sanitization
-    messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
+    messageContainer.innerHTML = response.trim();
     const links = messageContainer.querySelectorAll('a');
     links.forEach(link => {
         link.setAttribute('target', '_blank');
@@ -417,7 +414,6 @@ function codeBlockUIEnhancer(message) {
     if (match != null) {
         let remainder = message.trim();
         let temp = '';
-        let count = 1;
         while(true) {
             let index = remainder.indexOf('<pre>');
             if(index===-1) {
@@ -429,16 +425,10 @@ function codeBlockUIEnhancer(message) {
             match = languageRegex.exec(remainder); 
 
             if (!match) {
-                console.error("No language match found:", remainder);
+                match = "plaintext";
+            } else {
+                match = match[1];
             }
-            
-            try { // Remove later
-                match = match[1] || "plaintext";
-            } catch(error) {
-                alert(error);
-                break;
-            }
-
 
             temp += remainder.slice(0, index) + `<div class='code-container'><div class='code-language'>${match}</div><pre>`;
             remainder = remainder.slice(index+5, remainder.length);

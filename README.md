@@ -58,12 +58,15 @@ At PrivatePollenAI, **your privacy is a priority**:
 ---
 
 ## 📂 File Structure
+
+```
 │
 ├── index.html                # Main HTML file
 ├── chat.css                  # Stylesheet
 ├── chat.js                   # Core JavaScript logic
 ├── images/                   # Favicon and other assets
 ├── README.md                 # Documentation
+```
 
 ## ⚠️ Issues
 
