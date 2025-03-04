@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PrivatePollenAI</title>
     <link rel="stylesheet" href="./chat.css">
+    <!-- DOM PURIFY -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js" crossorigin="anonymous"></script>
     <!-- MARKED SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked-footnote/dist/index.umd.min.js" crossorigin="anonymous"></script>
@@ -50,38 +52,60 @@
             </div>
             <div style="display:flex; width:100%">
                 <div class="model-part-1">
-                    <div style="margin-bottom:20px;">
-                        <h3 style="text-align: center; margin-bottom: 20px">Choose Model</h3>
-                        <select id="model-options">
+                    <!-- Text Generation Model -->
+                    <h3 style="text-align: center; margin-bottom: 20px;">Choose Text Model</h3>
+                    <select id="model-options"  style="margin-bottom:20px;">
+                        <optgroup id="pollinationsAI" label="PollinationsAI"> 
+                            <option value="openai">OpenAI GPT-4o-mini</option>
+                            <option value="openai-large">OpenAI GPT-4o</option>
+                            <option value="openai-reasoning">OpenAI o1-mini</option>
+                            <option value="qwen-coder">Qwen 2.5 Coder 32B</option>
+                            <option value="llama">Llama 3.3 70B</option>
+                            <option value="mistral">Mistral Nemo</option>
+                            <option value="unity">Unity with Mistral Large by Unity AI Lab</option>
+                            <option value="midijourney">Midijourney musical transformer</option>
+                            <option value="rtist">Rtist image generator by @bqrio</option>
+                            <option value="searchgpt">SearchGPT with realtime news and web search</option>
+                            <option value="deepseek">DeepSeek-V3</option>
+                            <option value="claude-hybridspace">Claude Hybridspace</option>
+                            <option value="deepseek-r1">DeepSeek-R1 Distill Qwen 32B</option>
+                            <option value="deepseek-reasoner">DeepSeek R1 - Full</option>
+                            <option value="llamalight">Llama 3.1 8B Instruct</option>
+                            <option value="llamaguard">Llamaguard 7B AWQ</option>
+                            <option value="gemini">Gemini 2.0 Flash</option>
+                            <option value="gemini-thinking">Gemini 2.0 Flash Thinking</option>
+                            <option value="hormoz">Hormoz 8b by Muhammadreza Haghiri</option>
+                            <option value="hypnosis-tracy">Hypnosis Tracy - Your Self-Help AI</option>
+                            <option value="sur">Sur AI Assistant</option>
+                            <option value="sur-mistral">Sur AI Assistant (Mistral)</option>
+                            <option value="llama-scaleway">Llama (Scaleway)</option>
+                        </optgroup>
+                    </select>
+                    <button id="reset-chat-history-btn" onclick="resetHistory()">Reset Chat History</button>
+                    <!-- Title Generation Model -->
+                    <h3 style="text-align: center; margin:20px 0px">Choose Title Model</h3>
+                        <select id="title-model-options" style="margin-bottom:20px;">
                             <optgroup id="pollinationsAI" label="PollinationsAI"> 
                                 <option value="openai">OpenAI GPT-4o-mini</option>
                                 <option value="openai-large">OpenAI GPT-4o</option>
-                                <option value="openai-reasoning">OpenAI o1-mini</option>
                                 <option value="qwen-coder">Qwen 2.5 Coder 32B</option>
                                 <option value="llama">Llama 3.3 70B</option>
                                 <option value="mistral">Mistral Nemo</option>
-                                <option value="unity">Unity with Mistral Large by Unity AI Lab</option>
-                                <option value="midijourney">Midijourney musical transformer</option>
-                                <option value="rtist">Rtist image generator by @bqrio</option>
-                                <option value="searchgpt">SearchGPT with realtime news and web search</option>
-                                <option value="evil">Evil Mode - Experimental</option>
                                 <option value="deepseek">DeepSeek-V3</option>
                                 <option value="claude-hybridspace">Claude Hybridspace</option>
-                                <option value="deepseek-r1">DeepSeek-R1 Distill Qwen 32B</option>
-                                <option value="deepseek-reasoner">DeepSeek R1 - Full</option>
                                 <option value="llamalight">Llama 3.1 8B Instruct</option>
-                                <option value="llamaguard">Llamaguard 7B AWQ</option>
                                 <option value="gemini">Gemini 2.0 Flash</option>
-                                <option value="gemini-thinking">Gemini 2.0 Flash Thinking</option>
-                                <option value="hormoz">Hormoz 8b by Muhammadreza Haghiri</option>
-                                <option value="hypnosis-tracy">Hypnosis Tracy - Your Self-Help AI</option>
-                                <option value="sur">Sur AI Assistant</option>
-                                <option value="sur-mistral">Sur AI Assistant (Mistral)</option>
                                 <option value="llama-scaleway">Llama (Scaleway)</option>
                             </optgroup>
                         </select>
-                    </div>
-                    <button id="reset-chat-history-btn" onclick="resetHistory()">Reset Chat History</button>
+                    <button id="regenerate-title-btn" onclick="generateTitle()">Regenerate Title</button>
+                    <!-- Reopen Original Window / Issues -->
+                    <hr style="width:100%; margin: 30px 0px;">
+                     <div class="settings-minor-section">
+                        <button class="open-original-message-btn" onclick="displayOriginalMessage()">Open Original Message</button>
+                        <a target="_blank" rel="noopener noreferrer"  class="github-btn" href="https://github.com/MMojoCoder/PrivatePollenAI"><img src="/images/github-logo.png" style="width: 25px; height: 25px; margin-right: 5px;">Github</a>
+                        <a target="_blank" rel="noopener noreferrer"  class="issues-btn" href="https://github.com/MMojoCoder/PrivatePollenAI/issues/new">Issues</a>
+                     </div>
                 </div>
                 <div class="model-part-2">
                     <h3 style="margin-bottom: 20px; ">System Instructions</h3>

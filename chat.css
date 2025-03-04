@@ -88,6 +88,40 @@ body {
     background-color:hsl(0 0% 10.2%);
 }
 
+.settings-minor-section {
+    margin-top:15px;
+    width: 100%; 
+    height: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.open-original-message-btn, .github-btn, .issues-btn {
+    border: none;
+    padding:10px;
+    background: #1e1e1e;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    font-weight: bolder;
+}
+
+.github-btn, .issues-btn {
+    text-decoration: none;
+}
+
+.github-btn {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.open-original-message-btn:hover, .github-btn:hover, .issues-btn:hover {
+    filter:brightness(115%);
+    transform: scale(1.05);
+}
+
 .send-message-btn {
     border: none;
     background: transparent;
@@ -142,7 +176,7 @@ body {
     color: white;
 }
 
-#model-options {
+#model-options, #title-model-options {
     width: 510px;
     height: 30px;
     cursor: pointer;
@@ -299,7 +333,7 @@ body {
 }
 
 /* Reset Chat History Button */
-#reset-chat-history-btn {
+#reset-chat-history-btn, #regenerate-title-btn {
     width: 510px;
     min-height: 30px;
     background-color: #1e1e1e;
@@ -310,7 +344,7 @@ body {
     margin-top:20px;
 }
 
-#reset-chat-history-btn:hover {
+#reset-chat-history-btn:hover, #regenerate-title-btn:hover {
     filter:brightness(115%);
 }
 
@@ -345,37 +379,6 @@ body {
     resize: none; 
     border-radius: 5px;
 }
-
-
-#feedback, #support {
-    width:500px; 
-    height:60px; 
-    color:white;
-    background-color: #1e1e1e; 
-    padding:5px;
-    border-radius: 5px;
-    border: none;
-    overflow: auto;
-    outline: none;
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none;
-    resize: none; 
-}
-
-#submit-feedback-btn,
-#submit-support-btn {
-    width: 100px;
-    font-weight: bolder;
-    padding:5px;
-    border:none;
-    background-color: white;
-    border-radius: 30px;
-    color:black;
-    align-self: center;
-    cursor:pointer;
-}
-
 
 /* POPUP */
 .popup-container {

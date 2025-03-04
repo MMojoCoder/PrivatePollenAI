@@ -7,8 +7,9 @@ try {
 }
 
 let model = JSON.parse(localStorage.getItem('model')) || "openai";
+let titleModel = JSON.parse(localStorage.getItem('title_model')) || "openai";
 let system_message = JSON.parse(localStorage.getItem('custom_system_message')) || "";
-const popup_displayed = JSON.parse(localStorage.getItem('displayed_popup')) | false
+const popup_displayed = JSON.parse(localStorage.getItem('displayed_popup')) || false
 
 // ------------------------------------------ Markdown Setup --------------------------------------------------------
 marked.use(markedFootnote());
@@ -21,6 +22,7 @@ const modelSettings = document.querySelector('.settings-logo');
 const modelDisplay = document.querySelector('.model-settings');
 const modelClose = document.querySelector('#model-close');
 const modelChosen = document.querySelector('#model-options');
+const titleModelChosen = document.querySelector('#title-model-options');
 const modelLabel = document.querySelector('#displayModel');
 const custom_system_message = document.querySelector('#system-instructions');
 const popup = document.querySelector('.popup');
@@ -78,13 +80,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if(role==='ai') {
             message = processLatexFormula(message);
             message = marked.parse(message);
-            
             message = codeBlockUIEnhancer(message);
             
             const messageContainer = document.createElement('div');
             messageContainer.className = 'ai-response';
             
-            messageContainer.innerHTML = message.trim();
+            // Security
+            messageContainer.innerHTML = DOMPurify.sanitize(message.trim());
             const links = messageContainer.querySelectorAll('a');
             links.forEach(link => {
                 link.setAttribute('target', '_blank');
@@ -98,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Loads label for ai model
     modelChosen.value = model;
+    titleModelChosen.value = titleModel;
     modelLabel.textContent = modelChosen.options[modelChosen.selectedIndex].textContent; 
 
     hljs.highlightAll(); // Creates special code block look
@@ -221,14 +224,15 @@ async function returnAIMessage() {
     chat.removeChild(document.querySelector('.thinking'));
     chatHistory.push(['ai', response]);
     saveChatHistory();
-    response = processLatexFormula(response); // REMOVE HERE IF NOT WORKING
+    response = processLatexFormula(response);
     response = marked.marked(response);
     response = codeBlockUIEnhancer(response);
 
     const messageContainer = document.createElement('div');
     messageContainer.className = 'ai-response';
-
-    messageContainer.innerHTML = response.trim();
+    
+    // Security
+    messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
     const links = messageContainer.querySelectorAll('a');
     links.forEach(link => {
         link.setAttribute('target', '_blank');
@@ -270,19 +274,26 @@ async function generateImage(input) {
     scrollDown();
     let chat_history = chatHistory.map(message => message[1]);
     let response = await pollinationsAI(prompt=input, systemMessage=image_system_prompt, model='openai');
+    
+    if(response === "") {
+        response = "Image generator refused to respond."
+    }
+
     clearInterval(thinking);
     chat.removeChild(document.querySelector('.thinking'));
 
     chatHistory.push(['ai', response]);
     saveChatHistory();
+    
+    response = processLatexFormula(response);
     response = marked.marked(response);
-
     response = codeBlockUIEnhancer(response);
 
     const messageContainer = document.createElement('div');
     messageContainer.className = 'ai-response';
 
-    messageContainer.innerHTML = response.trim();
+    // Security
+    messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
     const links = messageContainer.querySelectorAll('a');
     links.forEach(link => {
         link.setAttribute('target', '_blank');
@@ -351,6 +362,10 @@ function displayThinking() {
     }, 200);
 }
 
+function displayOriginalMessage() {
+    popup.showModal();
+}
+
 // ------------------------------------------ Model ---------------------------------------------
 
 modelSettings.addEventListener('click', () => {
@@ -367,6 +382,11 @@ modelChosen.addEventListener('change', (chosenModel) => {
     modelLabel.textContent = chosenModel.target.options[chosenModel.target.selectedIndex].textContent; 
 })
 
+titleModelChosen.addEventListener('change', (chosen_title_model) => {
+    titleModel = chosen_title_model.target.value;
+    saveTitleModel();
+})
+
 // ------------------------------------------ Chat History ---------------------------------------------------------
 function saveChatHistory() {
     localStorage.setItem('local_chat_history', JSON.stringify(chatHistory));
@@ -374,6 +394,10 @@ function saveChatHistory() {
 
 function saveModel() {
     localStorage.setItem('model', JSON.stringify(model));
+}
+
+function saveTitleModel() {
+    localStorage.setItem('title_model', JSON.stringify(titleModel));
 }
 
 function resetHistory() {
@@ -399,7 +423,7 @@ function resetHistory() {
 async function generateTitle() {
     const title = document.querySelector('.title');
     let chat_history = chatHistory.map(message => message[1]);
-    let response = await pollinationsAI(chat_history.join("\n"), systemMessage="Generate a very short title based on the user's input. Nothing else. Do not respond to users prompt, merely generate a title based on user input.");
+    let response = await pollinationsAI(chat_history.join("\n"), systemMessage="Generate a very short title based on the user's input. Nothing else. Do not respond to users prompt, merely generate a title based on user input. Try to focus more on more recent conversation. Do not display quotation marks.", chosenModel = titleModel);
     localStorage.setItem('title', response);
     title.textContent = response;
 }
@@ -479,6 +503,15 @@ commandClose.addEventListener('click', () => {
 // ------------------------------------------ EXTRA CODE IM TOO LAZY TO ORGANIZE ---------------------------------------------------------
 
 function processLatexFormula(text) {
+    // Skipping code block
+    const codeBlockPattern = /```[\s\S]*?```/g;
+    const codeBlocks = [];
+    text = text.replace(codeBlockPattern, (match) => {
+        codeBlocks.push(match);
+        return `CODE_BLOCK_PLACEHOLDER_${codeBlocks.length - 1}`; // Placeholder
+    });
+
+    // Regex for Math Formulas
     const displayPattern = /\\\[((?:\\[^]|[^\\])*?)\\\]|\$\$((?:\\[^]|[^\\])*?)\$\$/g;
     const inlinePattern = /\\\(((?:\\[^]|[^\\])*?)\\\)|\$((?:\\[^]|[^\\])*?)\$/g;
 
@@ -503,6 +536,9 @@ function processLatexFormula(text) {
             trust: true,
         });
     });
+
+    // Readding code block from before
+    text = text.replace(/CODE_BLOCK_PLACEHOLDER_(\d+)/g, (match, index) => codeBlocks[index]);
 
     return text;
   }
