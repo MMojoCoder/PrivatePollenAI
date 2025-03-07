@@ -13,6 +13,7 @@ Welcome to **PrivatePollenAI**, your personalized, privacy-first conversational 
 2. **Customizable Settings**
    - Choose from various AI models like OpenAI models, Llama, Mistral, and more.
    - Define system instructions to guide AI behavior.
+   - Set desired max tokens and temperature
 
 3. **Markdown and Rich Responses**
    - Supports Markdown for formatting.
@@ -24,8 +25,10 @@ Welcome to **PrivatePollenAI**, your personalized, privacy-first conversational 
    - Enter `/image <prompt>` to generate images using Pollinations AI.
 
 5. **Commands**
-   - Input `/clear` to reset chat history.
-   - Invoke `/image` to create customized visuals.
+   1. **`/clear`** → This command clears the chat.
+   2. **`/title`** → This command regenerates the title.
+   3. **`/mood`** → This command logs the user's current mood.
+   4. **`/image`** → This command generates an image.
 
 6. **User-Friendly Interface**
    - Clean and intuitive UI.
@@ -34,16 +37,18 @@ Welcome to **PrivatePollenAI**, your personalized, privacy-first conversational 
 7. **Dynamic Chat History**
    - Saves your chat context for continuity in conversations.
    - Edit, reset, or initialize a brand-new chat with ease.
-
 ---
 
 ## 📋 Usage
 
 ### Commands
+
 | Command      | Description                                           |
 |--------------|-------------------------------------------------------|
 | **`/clear`** | Resets chat history and session.                     |
 | **`/image`** | Generates images based on the prompt you provide.    |
+| **`/title`** | Regenerates the title.                  |
+| **`/mood`**  | Generates the user's current mood based on chat history.           |
 
 ---
 
@@ -58,7 +63,6 @@ At PrivatePollenAI, **your privacy is a priority**:
 ---
 
 ## 📂 File Structure
-
 ```
 │
 ├── index.html                # Main HTML file
@@ -68,12 +72,35 @@ At PrivatePollenAI, **your privacy is a priority**:
 ├── README.md                 # Documentation
 ```
 
-## ⚠️ Issues
+---
+
+## 🙏 Acknowledgements
+
+Special thanks to:
+- The **PollinationsAI community** for their guidance, support, and for enabling free and privacy-respecting access to their APIs, making this project possible.
+- **@WithThatWay** *(Check out projects at [https://perchance.org/withthatway](https://perchance.org/withthatway))* for their contributions to KaTeX integration.
+
+
+Many thanks!
+
+---
+
+## ❓ Community Feedback
 
 If you encounter a bug or wish to propose a feature:
 1. Open an issue on GitHub.
 2. Provide detailed reproduction steps (if applicable).
 
-**If you see the message**: "This model appears to be down. Please try again later. If the issue persists, feel free to contact support." **please retry the operation after a moment or check back later.**
+If you see the message: *"This model appears to be down. Please try again later. If the issue persists, feel free to contact support,"* please retry after a moment or check back later.
 
 ---
+
+## 📣 Continuation?
+
+Do you actually find **PrivatePollenAI** helpful? **Should I keep coding this?**  
+If you'd like me to continue improving this project, please let me know!  
+Feel free to hit me up on **GitHub** or **Discord**—I'm genuinely curious if anyone uses this. 🚀
+
+---
+
+Thank you for exploring **PrivatePollenAI**! 😊

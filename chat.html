@@ -46,14 +46,17 @@
     <!-- POPUPS -->
     <dialog class="model-settings">
         <div class="model">
-            <div style="width:100%;">
+            <div style="width:100%; top:0px;">
                 <h2 style='text-align: center; margin-bottom:10px;'>Settings</h2>
                 <hr style="width:100%; top:0px;">
             </div>
-            <div style="display:flex; width:100%">
+            <div style="display:flex; width:100%; overflow: hidden;">
                 <div class="model-part-1">
                     <!-- Text Generation Model -->
-                    <h3 style="text-align: center; margin-bottom: 20px;">Choose Text Model</h3>
+                    <div style="display:flex; align-items: center; width:100%; margin-bottom: 20px;">
+                        <h3 style="flex-grow:1; text-align: center; position: relative; left:15px;">Choose Text Model</h3>
+                        <button style="border: none; border-radius: 30px; background-color: white; width: 20px; height: 20px; cursor:pointer; font-weight: 900;" onclick="showTextModelInfo()">i</button>
+                    </div>
                     <select id="model-options"  style="margin-bottom:20px;">
                         <optgroup id="pollinationsAI" label="PollinationsAI"> 
                             <option value="openai">OpenAI GPT-4o-mini</option>
@@ -82,30 +85,50 @@
                         </optgroup>
                     </select>
                     <button id="reset-chat-history-btn" onclick="resetHistory()">Reset Chat History</button>
-                    <!-- Title Generation Model -->
-                    <h3 style="text-align: center; margin:20px 0px">Choose Title Model</h3>
-                        <select id="title-model-options" style="margin-bottom:20px;">
-                            <optgroup id="pollinationsAI" label="PollinationsAI"> 
-                                <option value="openai">OpenAI GPT-4o-mini</option>
-                                <option value="openai-large">OpenAI GPT-4o</option>
-                                <option value="qwen-coder">Qwen 2.5 Coder 32B</option>
-                                <option value="llama">Llama 3.3 70B</option>
-                                <option value="mistral">Mistral Nemo</option>
-                                <option value="deepseek">DeepSeek-V3</option>
-                                <option value="claude-hybridspace">Claude Hybridspace</option>
-                                <option value="llamalight">Llama 3.1 8B Instruct</option>
-                                <option value="gemini">Gemini 2.0 Flash</option>
-                                <option value="llama-scaleway">Llama (Scaleway)</option>
-                            </optgroup>
-                        </select>
+                    <!-- Extra Settings -->
+                    <hr style="width:100%; margin-top: 20px;">
+                    <div style="display:flex; align-items: center; width:100%; margin: 20px 0px;">
+                        <h3 style="flex-grow:1; text-align: center;  position: relative; left:15px;">Max Tokens</h3>
+                        <button style="border: none; border-radius: 30px; background-color: white; width: 20px; height: 20px;cursor:pointer; font-weight: 900" onclick="showMaxTokensInfo()">i</button>
+                    </div>
+                    <input type="range" id="max-tokens" min="64" max="8192" value="4096">
+                    <label for="max-tokens" id="max-tokens-label">4096</label>
+
+                    <div style="display:flex; align-items: center; width:100%; margin: 20px 0px;">
+                        <h3 style="flex-grow:1; text-align: center; position: relative; left:15px;">Temperature</h3>
+                        <button style="border: none; border-radius: 30px; background-color: white; width: 20px; height: 20px;cursor:pointer; font-weight: 900" onclick="showTemperatureInfo()">i</button>
+                    </div>
+                    <input type="range" id="temperature" min="0.1" max="1" step="0.1" value="0.7">
+                    <label for="temperature" id="temperature-label">0.7</label>
+
+                    <button id="reset-extra-settings-btn">Reset To Default</button>
+                    <!-- Config Generation Model -->
+                    <hr style="width:100%; margin: 30px 0px;">
+                    <div style="display:flex; align-items: center; width:100%; margin: 20px 0px;">
+                        <h3 style="flex-grow:1; text-align: center;  position: relative; left:15px;">Choose Config Model</h3>
+                        <button style="border: none; border-radius: 30px; background-color: white; width: 20px; height: 20px;cursor:pointer; font-weight: 900" onclick="showConfigModelInfo()"><strong>i</strong></button>
+                    </div>
+                    <select id="config-model-options" style="margin-bottom:20px;">
+                        <optgroup id="pollinationsAI" label="PollinationsAI"> 
+                            <option value="openai">OpenAI GPT-4o-mini</option>
+                            <option value="openai-large">OpenAI GPT-4o</option>
+                            <option value="qwen-coder">Qwen 2.5 Coder 32B</option>
+                            <option value="llama">Llama 3.3 70B</option>
+                            <option value="mistral">Mistral Nemo</option>
+                            <option value="deepseek">DeepSeek-V3</option>
+                            <option value="claude-hybridspace">Claude Hybridspace</option>
+                            <option value="gemini">Gemini 2.0 Flash</option>
+                            <option value="llama-scaleway">Llama (Scaleway)</option>
+                        </optgroup>
+                    </select>
                     <button id="regenerate-title-btn" onclick="generateTitle()">Regenerate Title</button>
                     <!-- Reopen Original Window / Issues -->
                     <hr style="width:100%; margin: 30px 0px;">
-                     <div class="settings-minor-section">
+                    <div class="settings-minor-section">
                         <button class="open-original-message-btn" onclick="displayOriginalMessage()">Open Original Message</button>
                         <a target="_blank" rel="noopener noreferrer"  class="github-btn" href="https://github.com/MMojoCoder/PrivatePollenAI"><img src="./images/github-logo.png" style="width: 25px; height: 25px; margin-right: 5px;">Github</a>
                         <a target="_blank" rel="noopener noreferrer"  class="issues-btn" href="https://github.com/MMojoCoder/PrivatePollenAI/issues/new">Issues</a>
-                     </div>
+                    </div>
                 </div>
                 <div class="model-part-2">
                     <h3 style="margin-bottom: 20px; ">System Instructions</h3>
@@ -122,7 +145,7 @@
             <p><strong>Welcome to <span class="gradient-text">PrivatePollenAI</span></strong></p>
             <p>PrivatePollenAI is your personal chat assistant designed to prioritize your privacy. Here's how it works:</p>
             <ul>
-                <li><p><strong style="color:rgb(127, 0, 0);">Smart Technology</strong>: Our app is powered by <a style="color:rgb(103, 146, 33); outline: none;" href="https://pollinations.ai/"  target="_blank" rel="noopener noreferrer">PollinationAI</a>, which helps provide intelligent responses for your conversation needs.</p></li>
+                <li><p><strong style="color:rgb(127, 0, 0);">Smart Technology</strong>: Our app is powered by <a style="color:rgb(103, 146, 33); outline: none;" href="https://pollinations.ai/" target="_blank" rel="noopener noreferrer">PollinationAI</a>, which helps provide intelligent responses for your conversation needs.</p></li>
                 <br>
                 <li><p><strong style="color:blue">Your Data is Private</strong>: We store all your chat data securely in your device's local storage. This means your messages stay private and are not sent to external servers.</p></li>
                 <br>
@@ -142,7 +165,11 @@
             <ol>
                 <li><span class="nice-background">/clear</span> → This command clears the chat.</li>
                 <br>
-                <li><span class="nice-background">/image</span> → This command generates a image using pollinationsAI.</li>
+                <li><span class="nice-background">/title</span> → This command regenerates the title.</li>
+                <br>
+                <li><span class="nice-background">/mood</span> → This command logs the user's current mood.</li>
+                <br>
+                <li><span class="nice-background">/image</span> → This command generates a image.</li>
                 <br>
             </ol>
             <button id="commands-close">

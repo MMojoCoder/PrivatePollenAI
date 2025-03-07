@@ -176,8 +176,8 @@ body {
     color: white;
 }
 
-#model-options, #title-model-options {
-    width: 510px;
+#model-options, #config-model-options {
+    width: 500px;
     height: 30px;
     cursor: pointer;
     color:white;
@@ -198,15 +198,15 @@ body {
     justify-content: center;
     align-items: center;
     padding:5px;
-    width: 100px;
-    height: 50px;
+    min-width: 100px;
+    max-height: 50px;
     border-radius: 10px;
     border: none;
     background-color: red;
     cursor: pointer;
 }
 
-.model-part-1 {
+.model-part-1, .model-part-2 {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -214,12 +214,8 @@ body {
     flex:1;
 }
 
-.model-part-2 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height:100%;
-    flex:1;
+.model-part-1 {
+    overflow-y: scroll; 
 }
 
 /* AI RESPONSE TEXTS */
@@ -333,8 +329,8 @@ body {
 }
 
 /* Reset Chat History Button */
-#reset-chat-history-btn, #regenerate-title-btn {
-    width: 510px;
+#reset-chat-history-btn, #regenerate-title-btn, #reset-extra-settings-btn {
+    width: 500px;
     min-height: 30px;
     background-color: #1e1e1e;
     color: white;
@@ -344,7 +340,7 @@ body {
     margin-top:20px;
 }
 
-#reset-chat-history-btn:hover, #regenerate-title-btn:hover {
+#reset-chat-history-btn:hover, #regenerate-title-btn:hover, #reset-extra-settings-btn:hover {
     filter:brightness(115%);
 }
 
@@ -516,4 +512,34 @@ body {
 /* MINOR CHAT FIXES*/
 svg {
     max-width:100%;
+}
+
+/* stuff i need to integrate */
+
+input[type="range"] {
+    width: 95%;
+    -webkit-appearance: none;
+    appearance: none;
+    border: 5px solid rgb(206, 206, 206);
+    background: transparent;
+    border-radius: 5px;
+    max-height:10px;
+    margin: 30px 0px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 15px;
+    height:50px;
+    background:#666666
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    width: 15px;
+    height:50px;
+    appearance: none;
+    background:#666666
+}
+
+#max-tokens-label, #temperature-label {
+    font-weight: bolder;
 }

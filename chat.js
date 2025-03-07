@@ -7,7 +7,7 @@ try {
 }
 
 let model = JSON.parse(localStorage.getItem('model')) || "openai";
-let titleModel = JSON.parse(localStorage.getItem('title_model')) || "openai";
+let configModel = JSON.parse(localStorage.getItem('config_model')) || "openai";
 let system_message = JSON.parse(localStorage.getItem('custom_system_message')) || "";
 const popup_displayed = JSON.parse(localStorage.getItem('displayed_popup')) || false
 
@@ -22,12 +22,13 @@ const modelSettings = document.querySelector('.settings-logo');
 const modelDisplay = document.querySelector('.model-settings');
 const modelClose = document.querySelector('#model-close');
 const modelChosen = document.querySelector('#model-options');
-const titleModelChosen = document.querySelector('#title-model-options');
+const configModelChosen = document.querySelector('#config-model-options');
 const modelLabel = document.querySelector('#displayModel');
 const custom_system_message = document.querySelector('#system-instructions');
 const popup = document.querySelector('.popup');
 const commandClose = document.querySelector('#commands-close');
 const reset_chat_history_btn = document.querySelector('#reset-chat-history-btn');
+const regenerate_title_btn = document.querySelector('#regenerate-title-btn')
 
 // ------------------------------------------ Loading Everything --------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -100,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Loads label for ai model
     modelChosen.value = model;
-    titleModelChosen.value = titleModel;
+    configModelChosen.value = configModel;
     modelLabel.textContent = modelChosen.options[modelChosen.selectedIndex].textContent; 
 
     hljs.highlightAll(); // Creates special code block look
@@ -125,14 +126,17 @@ textAreaMessage.addEventListener("input", () => {
 
 // -------------------------------------- Input For Sending Messages ------------------------------------------
 
+// Send through click
 sendMessageButton.addEventListener('click', () => {
     if((textAreaMessage.value).trim()!="") {        
-        if(chatHistory.length===0) {
+        if(chatHistory.length===0 && textAreaMessage.value != '/title') {
             chat.removeChild(document.querySelector('.welcome-message'));
         } 
 
         if(textAreaMessage.value==='/clear') {
             resetHistory();
+        } else if(textAreaMessage.value==='/title') {
+            generateTitle();
         } else if(textAreaMessage.value.substring(0, 6) ==='/image') {
             sendMessage(textAreaMessage.value);
             generateImage((textAreaMessage.value).substring(6, textAreaMessage.length));
@@ -141,7 +145,6 @@ sendMessageButton.addEventListener('click', () => {
             returnAIMessage();
         }
 
-        
         textAreaMessage.value = "";
         e.preventDefault();
         textAreaMessage.style.height = "20px";
@@ -150,14 +153,18 @@ sendMessageButton.addEventListener('click', () => {
 // Press enter to send message
 textAreaMessage.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {   
-        
         if((textAreaMessage.value).trim()!="") {
-            if(chatHistory.length===0) {
+            if(chatHistory.length===0  && textAreaMessage.value != '/title') {
                 chat.removeChild(document.querySelector('.welcome-message'));
             }
 
             if(textAreaMessage.value==='/clear') {
                 resetHistory();
+            } else if(textAreaMessage.value==='/title') {
+                generateTitle(); 
+            } else if(textAreaMessage.value==='/mood') {
+                sendMessage(textAreaMessage.value);
+                moodAnalysis();
             } else if(textAreaMessage.value.substring(0, 6) ==='/image') {
                 sendMessage(textAreaMessage.value);
                 generateImage((textAreaMessage.value).substring(6, textAreaMessage.length));
@@ -250,6 +257,82 @@ async function returnAIMessage() {
     sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="./images/send.svg"></img>';    
 }
 
+// Mood Analysis
+async function moodAnalysis() {
+    const mood_system_prompt = `
+    Log user mood based off chat history. If not enough data available, state this.
+    
+    Format:
+    Mood Report:
+    - Emotion 1: X%
+    - Emotion 2: Y%
+    - Emotion 3: Z%
+    - Emotion 4: A%
+    - Emotion 5: B%
+    - Emotion 6: C%
+    - Emotion 7: D%
+
+    Overall Mood: Brief description of the emotional landscape.
+
+    Example: 
+    Mood Report:
+    - Joy: 25% 😊
+    - Melancholy: 12% 😔
+    - Anticipation: 35% 🎈
+    - Worry: 8% 😟
+    - Serenity: 15% 🌊
+    - Irritation: 5% 😤
+    - Drive: 20% 🏃‍♂️
+
+    Overall Mood: A blend of excitement and serenity, with a touch of melancholy.
+    `
+
+    textAreaMessage.disabled = true;
+    reset_chat_history_btn.disabled = true;
+    textAreaMessage.style.cursor = 'wait';
+    reset_chat_history_btn.style.cursor = 'wait';
+
+    let thinking = displayThinking();
+    scrollDown();
+    let chat_history = chatHistory.map(message => message[1]);
+    let response = await pollinationsAI(prompt=chat_history.join("\n"), systemMessage=mood_system_prompt, model=configModel);
+    
+    if(response === "") {
+        response = "Mood Analysis refused to respond."
+    }
+
+    clearInterval(thinking);
+    chat.removeChild(document.querySelector('.thinking'));
+
+    chatHistory.push(['ai', response]);
+    saveChatHistory();
+    
+    response = processLatexFormula(response);
+    response = marked.marked(response);
+    response = codeBlockUIEnhancer(response);
+
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'ai-response';
+
+    // Security
+    messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
+    const links = messageContainer.querySelectorAll('a');
+    links.forEach(link => {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', "noopener noreferrer");
+    });
+
+    chat.appendChild(messageContainer);
+    chat.appendChild(document.createElement('br'));
+
+    textAreaMessage.disabled = false; 
+    reset_chat_history_btn.disabled = false;
+    textAreaMessage.focus();
+    textAreaMessage.style.cursor = 'pointer';
+    reset_chat_history_btn.style.cursor = 'pointer';
+    hljs.highlightAll();
+    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="./images/send.svg"></img>';    
+}
 
 async function generateImage(input) {
     const image_system_prompt = `
@@ -257,6 +340,7 @@ async function generateImage(input) {
     Rules: 
     - Use URL encoding for the prompt to handle special characters.
     - If the user requests multiple images, generate unique seeds for each and generate each image according to format.
+    - No extra wording except for wording in example format.
     
     Example format:
 
@@ -272,8 +356,7 @@ async function generateImage(input) {
 
     let thinking = displayThinking();
     scrollDown();
-    let chat_history = chatHistory.map(message => message[1]);
-    let response = await pollinationsAI(prompt=input, systemMessage=image_system_prompt, model='openai');
+    let response = await pollinationsAI(prompt=input, systemMessage=image_system_prompt, model=configModel);
     
     if(response === "") {
         response = "Image generator refused to respond."
@@ -331,7 +414,10 @@ async function pollinationsAI(prompt, systemMessage = "assistant", chosenModel='
                 },
             ],
             model: chosenModel,
-            private: true
+            private: true,
+            temperature: savedTemperature,
+            max_tokens: savedTokensAmount,
+            seed: Math.round(Math.random() * 1000)
           })
         });
     
@@ -382,9 +468,9 @@ modelChosen.addEventListener('change', (chosenModel) => {
     modelLabel.textContent = chosenModel.target.options[chosenModel.target.selectedIndex].textContent; 
 })
 
-titleModelChosen.addEventListener('change', (chosen_title_model) => {
-    titleModel = chosen_title_model.target.value;
-    saveTitleModel();
+configModelChosen.addEventListener('change', (chosen_title_model) => {
+    configModel = chosen_title_model.target.value;
+    saveConfigModel();
 })
 
 // ------------------------------------------ Chat History ---------------------------------------------------------
@@ -396,8 +482,8 @@ function saveModel() {
     localStorage.setItem('model', JSON.stringify(model));
 }
 
-function saveTitleModel() {
-    localStorage.setItem('title_model', JSON.stringify(titleModel));
+function saveConfigModel() {
+    localStorage.setItem('config_model', JSON.stringify(configModel));
 }
 
 function resetHistory() {
@@ -421,11 +507,22 @@ function resetHistory() {
 }
 
 async function generateTitle() {
-    const title = document.querySelector('.title');
-    let chat_history = chatHistory.map(message => message[1]);
-    let response = await pollinationsAI(chat_history.join("\n"), systemMessage="Generate a very short title based on the user's input. Nothing else. Do not respond to users prompt, merely generate a title based on user input. Try to focus more on more recent conversation. Do not display quotation marks.", chosenModel = titleModel);
-    localStorage.setItem('title', response);
-    title.textContent = response;
+    if(chatHistory.length >= 1) {
+        // Doesn't allow reclicking
+        regenerate_title_btn.disabled = true;
+        regenerate_title_btn.style.cursor = 'wait';
+        
+        // Actual change of title
+        const title = document.querySelector('.title');
+        let chat_history = chatHistory.map(message => message[1]);
+        let response = await pollinationsAI(chat_history.join("\n"), systemMessage="Generate a very short title based on the user's input. Nothing else. Do not respond to users prompt, merely generate a title based on user input. Try to focus more on more recent conversation. Do not display quotation marks.", chosenModel = configModel);
+        localStorage.setItem('title', response);
+        title.textContent = response;
+
+        // Allowing reclicking after completion
+        regenerate_title_btn.disabled = false;
+        regenerate_title_btn.style.cursor = 'pointer';
+    }
 }
 
 // ------------------------------------------ FORMATTING ---------------------------------------------------------
@@ -473,7 +570,7 @@ function scrollDown() {
 
 
 // ------------------------------------------ SAVE CUSTOM SYSTEM MESSAGE ---------------------------------------------------------
-custom_system_message.addEventListener('change', () => {
+custom_system_message.addEventListener('input', () => {
     system_message = custom_system_message.value;
     localStorage.setItem('custom_system_message', JSON.stringify(custom_system_message.value));
 })
@@ -542,3 +639,56 @@ function processLatexFormula(text) {
 
     return text;
   }
+
+function showConfigModelInfo() {
+    alert("The Config Model is a AI Model that is for image generation and title generation.\nImage Generation Model: Flux\nSide Note: It doesn't actually generate images but creates their description and displays them using markdown.");
+}
+
+function showTextModelInfo() {
+    alert("The Text Model is an AI Model for text generation. You can choose from a variety of models.");
+}
+
+function showMaxTokensInfo() {
+    alert("Max Tokens specifies the maximum number of tokens the AI can generate. Higher values allow for longer responses but may result in longer processing times.");
+}
+
+function showTemperatureInfo() {
+    alert("Temperature controls the randomness of the AI's responses. Lower values (0.2) make responses more focused, while higher values (0.8) allow for more creativity and variation.")
+}
+
+// Max Tokens
+const savedTokensAmount = JSON.parse(localStorage.getItem('max_tokens')) || 4096;
+const max_tokens = document.querySelector('#max-tokens');
+max_tokens.value = savedTokensAmount;
+const max_tokens_label = document.querySelector('#max-tokens-label');
+max_tokens_label.textContent = savedTokensAmount;
+
+max_tokens.addEventListener('input', function() {
+    max_tokens_label.textContent = max_tokens.value;
+    localStorage.setItem('max_tokens', JSON.stringify(max_tokens.value));
+});
+
+
+// Temperature
+const savedTemperature = JSON.parse(localStorage.getItem('temperature')) || 0.7;
+const temperature = document.querySelector('#temperature');
+temperature.value = savedTemperature;
+const temperature_label = document.querySelector('#temperature-label');
+temperature_label.textContent = savedTemperature;
+
+temperature.addEventListener('input', function() {
+    temperature_label.textContent = temperature.value;
+    localStorage.setItem('temperature', JSON.stringify(temperature.value));
+});
+
+
+
+const reset_extra_settings_btn = document.querySelector('#reset-extra-settings-btn');
+reset_extra_settings_btn.addEventListener('click', function() {
+    max_tokens.value = 4096;
+    max_tokens_label.textContent = 4096;
+    localStorage.setItem('max_tokens', JSON.stringify(max_tokens.value));
+    temperature.value = 0.7;
+    temperature_label.textContent = 0.7;
+    localStorage.setItem('temperature', JSON.stringify(temperature.value));
+})
