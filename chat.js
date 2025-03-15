@@ -6,8 +6,10 @@ try {
     chatHistory = [];
 }
 
+let currentMessageIndex = 0;
 let model = JSON.parse(localStorage.getItem('model')) || "openai";
 let configModel = JSON.parse(localStorage.getItem('config_model')) || "openai";
+let imageRatio = JSON.parse(localStorage.getItem('image_ratio')) || "1:1"
 let system_message = JSON.parse(localStorage.getItem('custom_system_message')) || "";
 const popup_displayed = JSON.parse(localStorage.getItem('displayed_popup')) || false
 
@@ -23,6 +25,7 @@ const modelDisplay = document.querySelector('.model-settings');
 const modelClose = document.querySelector('#model-close');
 const modelChosen = document.querySelector('#model-options');
 const configModelChosen = document.querySelector('#config-model-options');
+const imageRatioChosen = document.querySelector('#image-ratio-options');
 const modelLabel = document.querySelector('#displayModel');
 const custom_system_message = document.querySelector('#system-instructions');
 const popup = document.querySelector('.popup');
@@ -54,34 +57,89 @@ document.addEventListener('DOMContentLoaded', () => {
     // Loads message history
     chatHistory.forEach(([role, message]) => {
         if(role==='user') {
-            const messageContainer = document.createElement('div');
-            messageContainer.setAttribute('style',`
-                background-color: rgb(46, 46, 46);
-                padding: 15px;
-                border-radius: 10px;
-                width: fit-content;
-                max-width: 70%;
-                margin-left: auto;
-            `);
+            const messageWrapper = document.createElement('div');
+            messageWrapper.setAttribute('data-id', currentMessageIndex);
+            messageWrapper.className ='user-wrapper';
         
-            const messageUser = document.createElement('span');
-            messageUser.textContent = message;
-            messageUser.setAttribute("style", `
-                color: #f5f5f5; 
-                display: inline-block;
-                word-break: break-word;
-                white-space: pre-wrap; 
-            `);
+            const messageContainer = document.createElement('span');
+            messageContainer.textContent = message;
+            messageContainer.className = 'user-message';
+            
+            messageWrapper.appendChild(messageContainer);
+            
+            const optionsWrapper = document.createElement('div');
+            optionsWrapper.className = 'user-options-wrapper';
+            optionsWrapper.style.marginLeft = 'auto';
 
-            messageContainer.appendChild(messageUser);
-            const breakElement = document.createElement('br');
-        
-            chat.appendChild(messageContainer);
-            chat.appendChild(breakElement);
+            const editButton = document.createElement('div');
+            editButton.className = 'user-options';
+            editButton.onclick = function() {
+                const newMessage = prompt('Edit this message. "/cancel" to cancel.');
+                
+                if(newMessage === null) {
+                    return;
+                }
+                
+                if(newMessage.trim() === "" || newMessage === "/cancel") {
+                    return;
+                }
+
+                // If user inputs command
+                if(newMessage.trim()==='/clear') {
+                    resetHistory();
+                    return;
+                } else if(newMessage.trim()==='/title') {
+                    generateTitle();
+                    return;
+                } else if(newMessage.substring(0, 6) ==='/image') {
+                    messageContainer.textContent = newMessage;
+                    const index = Number(messageWrapper.getAttribute('data-id')) + 1;
+                    Array.from(chat.children).forEach((message) => {
+                        const currentId = Number(message.getAttribute('data-id')) + 1
+                        if(currentId > Number(index)) {
+                            chat.removeChild(message);
+                            currentMessageIndex--;
+                        }
+                    });
+                    chatHistory[index-1] = ['user', newMessage, index-1];
+                    chatHistory = chatHistory.slice(0, index);
+                    saveChatHistory();
+                    generateImage(newMessage.substring(6, newMessage.length).trim());
+                } else {
+                    messageContainer.textContent = newMessage;
+                    const index = Number(messageWrapper.getAttribute('data-id')) + 1;
+                    Array.from(chat.children).forEach((message) => {
+                        const currentId = Number(message.getAttribute('data-id')) + 1
+                        if(currentId > Number(index)) {
+                            chat.removeChild(message);
+                            currentMessageIndex--;
+                        }
+                    });
+                    chatHistory[index-1] = ['user', newMessage, index-1];
+                    chatHistory = chatHistory.slice(0, index);
+                    saveChatHistory();
+                    returnAIMessage();
+                }
+            }
+
+            const editImg = document.createElement('img');
+            editImg.src = './images/edit.svg';
+
+            editButton.appendChild(editImg);
+
+            optionsWrapper.append(editButton);
+            messageWrapper.appendChild(optionsWrapper);
+            chat.appendChild(messageWrapper);
+    
+            currentMessageIndex++;
         } else if(role==='ai') {
             message = processLatexFormula(message);
             message = marked.parse(message);
             message = codeBlockUIEnhancer(message);
+
+            const messageWrapper = document.createElement('div');
+            messageWrapper.setAttribute('data-id', currentMessageIndex);
+            messageWrapper.className = 'ai-wrapper';
             
             const messageContainer = document.createElement('div');
             messageContainer.className = 'ai-response';
@@ -93,16 +151,82 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.setAttribute('target', '_blank');
                 link.setAttribute('rel', "noopener noreferrer");
             });
+
+
+            // Image Loading
+            const images = messageContainer.querySelectorAll('img');
+            images.forEach(image => {
+                image.onload = function() {
+                    image.style.height = "auto";
+                    image.style.width = "auto";
+                };
+            });
             
-            chat.appendChild(messageContainer);
-            chat.appendChild(document.createElement('br'));
+            messageWrapper.appendChild(messageContainer);
+
+            const optionsWrapper = document.createElement('div');
+            optionsWrapper.className = 'options-wrapper';
+            
+
+            // Copy
+            const copyButton = document.createElement('div');
+            copyButton.className = 'options';
+            
+            const copyImg = document.createElement('img');
+            copyImg.src = './images/copy.svg';
+            copyButton.appendChild(copyImg);
+
+            copyButton.onclick = function() {
+                navigator.clipboard.writeText(messageContainer.textContent)
+                    .then(() => {
+                        alert('Text copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                    });
+                };
+
+            // Regenerate
+            const regenerateButton = document.createElement('div');
+            regenerateButton.className = 'options';
+            
+            const regenerateImg = document.createElement('img');
+            regenerateImg.src = './images/sync.svg';
+            regenerateButton.appendChild(regenerateImg);
+
+            regenerateButton.onclick = function() {
+                const index = Number(messageWrapper.getAttribute('data-id'));
+                Array.from(chat.children).forEach((message) => {
+                    const currentId = Number(message.getAttribute('data-id')) + 1
+                    if(currentId > Number(index)) {
+                        chat.removeChild(message);
+                        currentMessageIndex--;
+                    }
+                });
+                chatHistory = chatHistory.slice(0, index);
+                saveChatHistory();
+                returnAIMessage();
+            }
+
+            optionsWrapper.appendChild(copyButton);
+            optionsWrapper.appendChild(regenerateButton);
+
+            messageWrapper.appendChild(optionsWrapper);
+
+            chat.appendChild(messageWrapper);
+
+            
+            currentMessageIndex++;
         }
     })
 
     // Loads label for ai model
     modelChosen.value = model;
+    imageRatioChosen.value = imageRatio;
     configModelChosen.value = configModel;
     modelLabel.textContent = modelChosen.options[modelChosen.selectedIndex].textContent; 
+
+    
 
     hljs.highlightAll(); // Creates special code block look
 
@@ -162,9 +286,6 @@ textAreaMessage.addEventListener("keydown", (e) => {
                 resetHistory();
             } else if(textAreaMessage.value==='/title') {
                 generateTitle(); 
-            } else if(textAreaMessage.value==='/mood') {
-                sendMessage(textAreaMessage.value);
-                moodAnalysis();
             } else if(textAreaMessage.value.substring(0, 6) ==='/image') {
                 sendMessage(textAreaMessage.value);
                 generateImage((textAreaMessage.value).substring(6, textAreaMessage.length));
@@ -184,44 +305,103 @@ textAreaMessage.addEventListener("keydown", (e) => {
 
 function sendMessage(input) {
     sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="./images/loading.gif"></img>';    
-    chatHistory.push(['user',input]);
+    chatHistory.push(['user',input, currentMessageIndex]);
     saveChatHistory();
 
     if(chatHistory.length === 1) {
         generateTitle();
     }
     
-    const messageContainer = document.createElement('div');
-    messageContainer.setAttribute('style',`
-        background-color: rgb(46, 46, 46);
-        padding: 15px;
-        border-radius: 10px;
-        width: fit-content;
-        max-width: 70%;
-        margin-left: auto;
-    `);
+    const messageWrapper = document.createElement('div');
+    messageWrapper.setAttribute('data-id', currentMessageIndex);
+    messageWrapper.className ='user-wrapper';
 
-    const message = document.createElement('span');
-    message.textContent = input;
-    message.setAttribute("style", `
-        color: #f5f5f5; 
-        display: inline-block;
-        word-break: break-word;
-        white-space: pre-wrap; 
-    `);
+    const messageContainer = document.createElement('span');
+    messageContainer.textContent = input;
+    messageContainer.className = 'user-message';
+    
+    messageWrapper.appendChild(messageContainer);
+    
+    const optionsWrapper = document.createElement('div');
+    optionsWrapper.className = 'user-options-wrapper';
+    optionsWrapper.style.marginLeft = 'auto';
 
-    messageContainer.appendChild(message);
-    const breakElement = document.createElement('br');
+    const editButton = document.createElement('div');
+    editButton.className = 'user-options';
+    editButton.onclick = function() {
+        const newMessage = prompt('Edit this message. "/cancel" to cancel.');
+        
+        if(newMessage === null) {
+            return;
+        }
 
-    chat.appendChild(messageContainer);
-    chat.appendChild(breakElement);
+        if(newMessage.trim() === "" || newMessage === "/cancel") {
+            return;
+        }
+
+        // If user inputs command
+        if(newMessage.trim() === '/clear') {
+            resetHistory();
+            return;
+        } else if(newMessage.trim() === '/title') {
+            generateTitle();
+            return;
+        } else if(newMessage.substring(0, 6) === '/image') {
+            messageContainer.textContent = newMessage;
+            const index = Number(messageWrapper.getAttribute('data-id')) + 1;
+            Array.from(chat.children).forEach((message) => {
+                const currentId = Number(message.getAttribute('data-id')) + 1
+                if(currentId > Number(index)) {
+                    chat.removeChild(message);
+                    currentMessageIndex--;
+                }
+            });
+            chatHistory[index-1] = ['user', newMessage, index-1];
+            chatHistory = chatHistory.slice(0, index);
+            saveChatHistory();
+            generateImage(newMessage.substring(6, newMessage.length).trim());
+        } else {
+            messageContainer.textContent = newMessage;
+            const index = Number(messageWrapper.getAttribute('data-id')) + 1;
+            Array.from(chat.children).forEach((message) => {
+                const currentId = Number(message.getAttribute('data-id')) + 1
+                if(currentId > Number(index)) {
+                    chat.removeChild(message);
+                    currentMessageIndex--;
+                }
+            });
+            chatHistory[index-1] = ['user', newMessage, index-1];
+            chatHistory = chatHistory.slice(0, index);
+            saveChatHistory();
+            returnAIMessage();
+        }
+    }
+
+    const editImg = document.createElement('img');
+    editImg.src = './images/edit.svg';
+
+    editButton.appendChild(editImg);
+
+    optionsWrapper.append(editButton);
+    messageWrapper.appendChild(optionsWrapper);
+    chat.appendChild(messageWrapper);
+
+    currentMessageIndex++;
 }
 
 async function returnAIMessage() {
     textAreaMessage.disabled = true;
     textAreaMessage.style.cursor = 'wait';
+    sendMessageButton.style.cursor = 'wait';
     reset_chat_history_btn.disabled = true;
     reset_chat_history_btn.style.cursor = 'wait';
+    
+    // Disable all edit buttons
+    const editButtons = document.querySelectorAll('.user-options');
+    editButtons.forEach(editButton => {
+        editButton.style.pointerEvents = 'none';
+    });
+
 
     let thinking = displayThinking();
     scrollDown();
@@ -229,7 +409,7 @@ async function returnAIMessage() {
     let response = await pollinationsAI(chat_history.join("\n"), systemMessage=system_message, chosenModel=model);
     clearInterval(thinking);
     chat.removeChild(document.querySelector('.thinking'));
-    chatHistory.push(['ai', response]);
+    chatHistory.push(['ai', response, currentMessageIndex]);
     saveChatHistory();
     response = processLatexFormula(response);
     response = marked.marked(response);
@@ -244,94 +424,90 @@ async function returnAIMessage() {
     links.forEach(link => {
         link.setAttribute('target', '_blank');
         link.setAttribute('rel', "noopener noreferrer");
+        link.setAttribute('class', 'gradient-text')
     });
 
-    chat.appendChild(messageContainer);
-    chat.appendChild(document.createElement('br'));
-    textAreaMessage.disabled = false; 
-    textAreaMessage.focus();
-    textAreaMessage.style.cursor = 'pointer';
-    reset_chat_history_btn.disabled = false;
-    reset_chat_history_btn.style.cursor = 'pointer';
-    hljs.highlightAll();
-    sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="./images/send.svg"></img>';    
-}
+    // Image Loading
+    const images = messageContainer.querySelectorAll('img');
+    images.forEach(image => {
+        image.onload = function() {
+            image.style.height = "auto";
+            image.style.width = "auto";
+        };
+    });
 
-// Mood Analysis
-async function moodAnalysis() {
-    const mood_system_prompt = `
-    Log user mood based off chat history. If not enough data available, state this.
+    const messageWrapper = document.createElement('div');
+    messageWrapper.setAttribute('data-id', currentMessageIndex);
+    messageWrapper.className = 'ai-wrapper';
     
-    Format:
-    Mood Report:
-    - Emotion 1: X%
-    - Emotion 2: Y%
-    - Emotion 3: Z%
-    - Emotion 4: A%
-    - Emotion 5: B%
-    - Emotion 6: C%
-    - Emotion 7: D%
+    messageWrapper.appendChild(messageContainer);
 
-    Overall Mood: Brief description of the emotional landscape.
-
-    Example: 
-    Mood Report:
-    - Joy: 25% 😊
-    - Melancholy: 12% 😔
-    - Anticipation: 35% 🎈
-    - Worry: 8% 😟
-    - Serenity: 15% 🌊
-    - Irritation: 5% 😤
-    - Drive: 20% 🏃‍♂️
-
-    Overall Mood: A blend of excitement and serenity, with a touch of melancholy.
-    `
-
-    textAreaMessage.disabled = true;
-    reset_chat_history_btn.disabled = true;
-    textAreaMessage.style.cursor = 'wait';
-    reset_chat_history_btn.style.cursor = 'wait';
-
-    let thinking = displayThinking();
-    scrollDown();
-    let chat_history = chatHistory.map(message => message[1]);
-    let response = await pollinationsAI(prompt=chat_history.join("\n"), systemMessage=mood_system_prompt, model=configModel);
+    const optionsWrapper = document.createElement('div');
+    optionsWrapper.className = 'options-wrapper';
     
-    if(response === "") {
-        response = "Mood Analysis refused to respond."
+
+    // Copy
+    const copyButton = document.createElement('div');
+    copyButton.className = 'options';
+    
+    const copyImg = document.createElement('img');
+    copyImg.src = './images/copy.svg';
+    copyButton.appendChild(copyImg);
+
+    copyButton.onclick = function() {
+        navigator.clipboard.writeText(messageContainer.textContent)
+            .then(() => {
+                alert('Text copied to clipboard!');
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        };
+
+    // Regenerate
+    const regenerateButton = document.createElement('div');
+    regenerateButton.className = 'options';
+    
+    const regenerateImg = document.createElement('img');
+    regenerateImg.src = './images/sync.svg';
+    regenerateButton.appendChild(regenerateImg);
+
+    regenerateButton.onclick = function() {
+        const index = Number(messageWrapper.getAttribute('data-id'));
+        Array.from(chat.children).forEach((message) => {
+            if(message.getAttribute('data-id')!= null) {
+                const currentId = Number(message.getAttribute('data-id')) + 1
+                if(currentId > Number(index)) {
+                    chat.removeChild(message);
+                    currentMessageIndex--;
+                }
+            }
+        });
+        chatHistory = chatHistory.slice(0, index);
+        saveChatHistory();
+        returnAIMessage();
     }
 
-    clearInterval(thinking);
-    chat.removeChild(document.querySelector('.thinking'));
-
-    chatHistory.push(['ai', response]);
-    saveChatHistory();
+    optionsWrapper.appendChild(copyButton);
+    optionsWrapper.appendChild(regenerateButton);
     
-    response = processLatexFormula(response);
-    response = marked.marked(response);
-    response = codeBlockUIEnhancer(response);
+    messageWrapper.appendChild(optionsWrapper);
 
-    const messageContainer = document.createElement('div');
-    messageContainer.className = 'ai-response';
-
-    // Security
-    messageContainer.innerHTML = DOMPurify.sanitize(response.trim());
-    const links = messageContainer.querySelectorAll('a');
-    links.forEach(link => {
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', "noopener noreferrer");
-    });
-
-    chat.appendChild(messageContainer);
-    chat.appendChild(document.createElement('br'));
+    chat.appendChild(messageWrapper);
 
     textAreaMessage.disabled = false; 
-    reset_chat_history_btn.disabled = false;
     textAreaMessage.focus();
     textAreaMessage.style.cursor = 'pointer';
+    sendMessageButton.style.cursor = 'pointer';
+    reset_chat_history_btn.disabled = false;
     reset_chat_history_btn.style.cursor = 'pointer';
+    // Reenable all edit buttons
+    editButtons.forEach(editButton => {
+        editButton.style.pointerEvents = 'auto';
+    });
     hljs.highlightAll();
     sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="./images/send.svg"></img>';    
+    currentMessageIndex++;
 }
 
 async function generateImage(input) {
@@ -340,23 +516,32 @@ async function generateImage(input) {
     Rules: 
     - Use URL encoding for the prompt to handle special characters.
     - If the user requests multiple images, generate unique seeds for each and generate each image according to format.
+    - Use formatting - ${imageRatio}
     - No extra wording except for wording in example format.
     
     Example format:
 
-    Original Prompt: 
+    Original Prompt: (Do not include number of images requesteed) 
     Enhanced Prompted:
+    Images Requested:
+    Image Ratio: 
     ![Image](https://image.pollinations.ai/prompt/{description}?width={width}&height={height}&seed=(random_seed)&nologo=true)  
     `
 
     textAreaMessage.disabled = true;
     reset_chat_history_btn.disabled = true;
     textAreaMessage.style.cursor = 'wait';
+    sendMessageButton.style.cursor = 'wait';
     reset_chat_history_btn.style.cursor = 'wait';
+    // Disable all edit buttons
+    const editButtons = document.querySelectorAll('.user-options');
+    editButtons.forEach(editButton => {
+        editButton.style.pointerEvents = 'none';
+    });
 
     let thinking = displayThinking();
     scrollDown();
-    let response = await pollinationsAI(prompt=input, systemMessage=image_system_prompt, model=configModel);
+    let response = await pollinationsAI(imagePrompt=input, systemMessage=image_system_prompt, model=configModel);
     
     if(response === "") {
         response = "Image generator refused to respond."
@@ -365,7 +550,7 @@ async function generateImage(input) {
     clearInterval(thinking);
     chat.removeChild(document.querySelector('.thinking'));
 
-    chatHistory.push(['ai', response]);
+    chatHistory.push(['ai', response, currentMessageIndex]);
     saveChatHistory();
     
     response = processLatexFormula(response);
@@ -383,19 +568,92 @@ async function generateImage(input) {
         link.setAttribute('rel', "noopener noreferrer");
     });
 
-    chat.appendChild(messageContainer);
-    chat.appendChild(document.createElement('br'));
+    // Image Loading
+    const images = messageContainer.querySelectorAll('img');
+    images.forEach(image => {
+        image.onload = function() {
+            image.style.height = "auto";
+            image.style.width = "auto";
+        };
+    });
+
+
+    const messageWrapper = document.createElement('div');
+    messageWrapper.setAttribute('data-id', currentMessageIndex);
+    messageWrapper.className = 'ai-wrapper';
+    
+    messageWrapper.appendChild(messageContainer);
+
+    const optionsWrapper = document.createElement('div');
+    optionsWrapper.className = 'options-wrapper';
+    
+
+    // Copy
+    const copyButton = document.createElement('div');
+    copyButton.className = 'options';
+    
+    const copyImg = document.createElement('img');
+    copyImg.src = './images/copy.svg';
+    copyButton.appendChild(copyImg);
+
+    copyButton.onclick = function() {
+        navigator.clipboard.writeText(messageContainer.textContent)
+            .then(() => {
+                alert('Text copied to clipboard!');
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        };
+
+    // Regenerate
+    const regenerateButton = document.createElement('div');
+    regenerateButton.className = 'options';
+    
+    const regenerateImg = document.createElement('img');
+    regenerateImg.src = './images/sync.svg';
+    regenerateButton.appendChild(regenerateImg);
+
+    regenerateButton.onclick = function() {
+        const index = Number(messageWrapper.getAttribute('data-id'));
+        Array.from(chat.children).forEach((message) => {
+            if(message.getAttribute('data-id')!= null) {
+                const currentId = Number(message.getAttribute('data-id')) + 1
+                if(currentId > Number(index)) {
+                    chat.removeChild(message);
+                    currentMessageIndex--;
+                }
+            }
+        });
+        chatHistory = chatHistory.slice(0, index);
+        saveChatHistory();
+        generateImage(input);
+    }
+
+    optionsWrapper.appendChild(copyButton);
+    optionsWrapper.appendChild(regenerateButton);
+
+    
+    messageWrapper.appendChild(optionsWrapper);
+
+    chat.appendChild(messageWrapper);
 
     textAreaMessage.disabled = false; 
     reset_chat_history_btn.disabled = false;
     textAreaMessage.focus();
     textAreaMessage.style.cursor = 'pointer';
+    sendMessageButton.style.cursor = 'pointer';
     reset_chat_history_btn.style.cursor = 'pointer';
+    // Reenable all edit buttons
+    editButtons.forEach(editButton => {
+        editButton.style.pointerEvents = 'auto';
+    });
     hljs.highlightAll();
     sendMessageButton.innerHTML = '<img style="height:30px; width:30px;" src="./images/send.svg"></img>';    
+    currentMessageIndex++;
 }
 
-async function pollinationsAI(prompt, systemMessage = "assistant", chosenModel='openai') {
+async function pollinationsAI(imagePrompt, systemMessage = "assistant", chosenModel='openai') {
     try {
         const response = await fetch('https://text.pollinations.ai/', {
           method: 'POST',
@@ -410,7 +668,7 @@ async function pollinationsAI(prompt, systemMessage = "assistant", chosenModel='
                 },
                 {
                     role: "user",
-                    content: prompt,
+                    content: imagePrompt,
                 },
             ],
             model: chosenModel,
@@ -473,6 +731,11 @@ configModelChosen.addEventListener('change', (chosen_title_model) => {
     saveConfigModel();
 })
 
+imageRatioChosen.addEventListener('change', (chosen_image_ratio) => {
+    imageRatio = chosen_image_ratio.target.value;
+    saveImageRatio();
+})
+
 // ------------------------------------------ Chat History ---------------------------------------------------------
 function saveChatHistory() {
     localStorage.setItem('local_chat_history', JSON.stringify(chatHistory));
@@ -482,11 +745,16 @@ function saveModel() {
     localStorage.setItem('model', JSON.stringify(model));
 }
 
+function saveImageRatio() {
+    localStorage.setItem('image_ratio', JSON.stringify(imageRatio));
+}
+
 function saveConfigModel() {
     localStorage.setItem('config_model', JSON.stringify(configModel));
 }
 
 function resetHistory() {
+    currentMessageIndex = 0;
     chatHistory = [];
     localStorage.setItem('title', '');
     localStorage.setItem('local_chat_history', JSON.stringify([]));
@@ -654,6 +922,10 @@ function showMaxTokensInfo() {
 
 function showTemperatureInfo() {
     alert("Temperature controls the randomness of the AI's responses. Lower values (0.2) make responses more focused, while higher values (0.8) allow for more creativity and variation.")
+}
+
+function showImageRatioInfo() {
+    alert("Image ratio defines the relationship between width and height. It’s crucial for ensuring images display correctly and maintain intended proportions. Common ratios include 16:9, 4:3, and 1:1. Using the right ratio keeps your images sharp and properly framed.");
 }
 
 // Max Tokens

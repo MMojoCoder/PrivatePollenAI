@@ -27,8 +27,7 @@ Welcome to **PrivatePollenAI**, your personalized, privacy-first conversational 
 5. **Commands**
    1. **`/clear`** → This command clears the chat.
    2. **`/title`** → This command regenerates the title.
-   3. **`/mood`** → This command logs the user's current mood.
-   4. **`/image`** → This command generates an image.
+   3. **`/image`** → This command generates an image.
 
 6. **User-Friendly Interface**
    - Clean and intuitive UI.
@@ -48,7 +47,6 @@ Welcome to **PrivatePollenAI**, your personalized, privacy-first conversational 
 | **`/clear`** | Resets chat history and session.                     |
 | **`/image`** | Generates images based on the prompt you provide.    |
 | **`/title`** | Regenerates the title.                  |
-| **`/mood`**  | Generates the user's current mood based on chat history.           |
 
 ---
 

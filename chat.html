@@ -65,7 +65,7 @@
                         <h3 style="flex-grow:1; text-align: center; position: relative; left:15px;">Choose Text Model</h3>
                         <button style="border: none; border-radius: 30px; background-color: white; width: 20px; height: 20px; cursor:pointer; font-weight: 900;" onclick="showTextModelInfo()">i</button>
                     </div>
-                    <select id="model-options"  style="margin-bottom:20px;">
+                    <select id="model-options">
                         <optgroup id="pollinationsAI" label="PollinationsAI"> 
                             <option value="openai">OpenAI GPT-4o-mini</option>
                             <option value="openai-large">OpenAI GPT-4o</option>
@@ -92,6 +92,7 @@
                             <option value="llama-scaleway">Llama (Scaleway)</option>
                         </optgroup>
                     </select>
+                    <button id="regenerate-title-btn" onclick="generateTitle()">Regenerate Title</button>
                     <button id="reset-chat-history-btn" onclick="resetHistory()">Reset Chat History</button>
                     <!-- Extra Settings -->
                     <hr style="width:100%; margin-top: 20px;">
@@ -111,12 +112,24 @@
 
                     <button id="reset-extra-settings-btn">Reset To Default</button>
                     <!-- Config Generation Model -->
-                    <hr style="width:100%; margin: 30px 0px;">
+                    <hr style="width:100%; margin-top: 30px;">
+                    <div style="display:flex; align-items: center; width:100%; margin: 20px 0px;">
+                        <h3 style="flex-grow:1; text-align: center;  position: relative; left:15px;">Image Ratio</h3>
+                        <button style="border: none; border-radius: 30px; background-color: white; width: 20px; height: 20px;cursor:pointer; font-weight: 900" onclick="showImageRatioInfo()"><strong>i</strong></button>
+                    </div>
+                    <select id="image-ratio-options">
+                        <option value="1:1">Square (1:1)</option>
+                        <option value="2:3">Portrait (2:3)</option>
+                        <option value="3:2">Landscape (3:2)</option>
+                        <option value="4:5">Social Media (4:5)</option>
+                        <option value="9:16">Wallpaper (9:16)</option>
+                        <option value="16:9">Desktop (16:9)</option>
+                    </select>
                     <div style="display:flex; align-items: center; width:100%; margin: 20px 0px;">
                         <h3 style="flex-grow:1; text-align: center;  position: relative; left:15px;">Choose Config Model</h3>
                         <button style="border: none; border-radius: 30px; background-color: white; width: 20px; height: 20px;cursor:pointer; font-weight: 900" onclick="showConfigModelInfo()"><strong>i</strong></button>
                     </div>
-                    <select id="config-model-options" style="margin-bottom:20px;">
+                    <select id="config-model-options">
                         <optgroup id="pollinationsAI" label="PollinationsAI"> 
                             <option value="openai">OpenAI GPT-4o-mini</option>
                             <option value="openai-large">OpenAI GPT-4o</option>
@@ -129,7 +142,6 @@
                             <option value="llama-scaleway">Llama (Scaleway)</option>
                         </optgroup>
                     </select>
-                    <button id="regenerate-title-btn" onclick="generateTitle()">Regenerate Title</button>
                     <!-- Reopen Original Window / Issues -->
                     <hr style="width:100%; margin: 30px 0px;">
                     <div class="settings-minor-section">
@@ -174,8 +186,6 @@
                 <li><span class="nice-background">/clear</span> → This command clears the chat.</li>
                 <br>
                 <li><span class="nice-background">/title</span> → This command regenerates the title.</li>
-                <br>
-                <li><span class="nice-background">/mood</span> → This command logs the user's current mood.</li>
                 <br>
                 <li><span class="nice-background">/image</span> → This command generates a image.</li>
                 <br>
