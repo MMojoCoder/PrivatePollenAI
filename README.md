@@ -93,12 +93,4 @@ If you see the message: *"This model appears to be down. Please try again later.
 
 ---
 
-## 📣 Continuation?
-
-Do you actually find **PrivatePollenAI** helpful? **Should I keep coding this?**  
-If you'd like me to continue improving this project, please let me know!  
-Feel free to hit me up on **GitHub** or **Discord**—I'm genuinely curious if anyone uses this. 🚀
-
----
-
 Thank you for exploring **PrivatePollenAI**! 😊
